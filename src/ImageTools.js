@@ -15,12 +15,8 @@ export default class ImageTools extends React.Component {
     };
   }
 
-  componentDidMount() {
-
-  }
-
-  componentWillUnmount() {
-
+  componentDidUpdate() {
+    console.log(this.state.editSpec);
   }
 
   render() {
@@ -40,7 +36,7 @@ export default class ImageTools extends React.Component {
           </div>
         </div>
         <div className="crop-container">
-          <img className="preview-image" src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} alt="preview"/>
+          <img className="preview-image" onLoad={this.dimensions} src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} alt="preview"/>
         </div>
       </div>
     );
