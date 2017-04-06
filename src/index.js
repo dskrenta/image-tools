@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import ImageTools from './ImageTools';
 import './index.css';
 
 ReactDOM.render(
-  <App message="Hello, world!"/>,
+  <ImageTools />,
   document.getElementById('root')
 );
