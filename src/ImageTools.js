@@ -1,5 +1,7 @@
 import React from 'react';
 import './ImageTools.css';
+import ReactCrop from 'react-image-crop';
+import '../node_modules/react-image-crop/dist/ReactCrop.css';
 
 export default class ImageTools extends React.Component {
   constructor(props) {
@@ -35,9 +37,7 @@ export default class ImageTools extends React.Component {
             <button onClick={this.reset}>Reset</button>
           </div>
         </div>
-        <div className="crop-container">
-          <img className="preview-image" onLoad={this.dimensions} src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} alt="preview"/>
-        </div>
+        <ReactCrop className="preview-image" src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} />
       </div>
     );
   }

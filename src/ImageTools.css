@@ -1,9 +1,3 @@
-.crop-container {
-  width: calc(100vw - 170px);
-  height: 100vh;
-  display: inline-block;
-}
-
 .preview-image {
   object-fit: contain;
   object-position: center;
@@ -28,14 +22,4 @@
   position: relative;
   top: 50%;
   transform: translateY(-50%);
-}
-
-.crop {
-  position: absolute;
-  width: 400px;
-  height: 300px;
-  border-style: dashed;
-  border-color: red;
-  top: 20px;
-  left: 20px;
 }
