@@ -1,7 +1,7 @@
 import React from 'react';
 import './ImageTools.css';
 
-class ImageTools extends React.Component {
+export default class ImageTools extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -28,7 +28,7 @@ class ImageTools extends React.Component {
       <div className="image-tools">
         <div className="menu">
           <div className="content-wrap">
-            <form onChange={this.updateFilters}>
+            <form onChange={this.updateValues}>
               <label>Brightness</label>
               <input type="range" data-type="brt" value={this.state.values.brt} min="100" max="300"></input>
               <label>Saturation</label>
@@ -40,7 +40,7 @@ class ImageTools extends React.Component {
           </div>
         </div>
         <div className="crop-container">
-          <img className="preview-image" src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} alt="preview-image"/>
+          <img className="preview-image" src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} alt="preview"/>
         </div>
       </div>
     );
@@ -55,14 +55,11 @@ class ImageTools extends React.Component {
     this.setState({values: values, editSpec: editSpec});
   }
 
-  updateFilters = (event) => {
+  updateValues = (event) => {
     const value = event.target.value;
     const type = event.target.dataset.type;
     const values = this.state.values;
     values[type] = value;
     this.updateEditSpec(values);
-
   }
 }
-
-export default ImageTools;
