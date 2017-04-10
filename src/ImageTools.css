@@ -1,9 +1,8 @@
-.crop-container {
-  width: calc(100vw - 170px);
-  height: 100vh;
-  display: inline-block;
+.image-tools {
+  width: 500px;
+  height: 500px;
 }
-
+/*
 .preview-image {
   object-fit: contain;
   object-position: center;
@@ -29,13 +28,16 @@
   top: 50%;
   transform: translateY(-50%);
 }
+*/
 
-.crop {
-  position: absolute;
-  width: 400px;
-  height: 300px;
-  border-style: dashed;
-  border-color: red;
-  top: 20px;
-  left: 20px;
+.image-tool-bar {
+  background-color: #f8f8f8;
+  width: 500px;
+  height: 150px;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: flex-start;
+  align-items: flex-start;
 }

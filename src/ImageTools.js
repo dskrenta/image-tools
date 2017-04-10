@@ -1,5 +1,8 @@
 import React from 'react';
 import './ImageTools.css';
+import ReactCrop from 'react-image-crop';
+// import '../node_modules/react-image-crop/dist/ReactCrop.css';
+import './ReactCrop.css';
 
 export default class ImageTools extends React.Component {
   constructor(props) {
@@ -20,23 +23,45 @@ export default class ImageTools extends React.Component {
   }
 
   render() {
+    /*
     return (
       <div className="image-tools">
         <div className="menu">
           <div className="content-wrap">
             <form onChange={this.updateValues}>
-              <label>Brightness</label>
+              <label>Brightness {this.state.values.brt}%</label>
               <input type="range" data-type="brt" value={this.state.values.brt} min="100" max="300"></input>
-              <label>Saturation</label>
+              <label>Saturation {this.state.values.sat}%</label>
               <input type="range" data-type="sat" value={this.state.values.sat} min="100" max="300"></input>
-              <label>Contrast</label>
+              <label>Contrast {this.state.values.con}%</label>
               <input type="range" data-type="con" value={this.state.values.con} min="0" max="50"></input>
             </form>
             <button onClick={this.reset}>Reset</button>
           </div>
         </div>
-        <div className="crop-container">
-          <img className="preview-image" onLoad={this.dimensions} src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} alt="preview"/>
+        <ReactCrop className="preview-image" src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} />
+      </div>
+    );
+    */
+    return (
+      <div className="image-tools">
+        <ReactCrop className="preview-image" src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} />
+        <div className="image-tool-bar">
+          <form onChange={this.updateValues}>
+            <div>
+              <input type="range" data-type="brt" value={this.state.values.brt} min="100" max="300"></input>
+              <label>Brightness {this.state.values.brt}%</label>
+            </div>
+            <div>
+              <input type="range" data-type="sat" value={this.state.values.sat} min="100" max="300"></input>
+              <label>Saturation {this.state.values.sat}%</label>
+            </div>
+            <div>
+              <input type="range" data-type="con" value={this.state.values.con} min="0" max="50"></input>
+              <label>Contrast {this.state.values.con}%</label>
+            </div>
+          </form>
+          <button onClick={this.reset}>Reset</button>
         </div>
       </div>
     );
