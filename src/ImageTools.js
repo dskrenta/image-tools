@@ -36,11 +36,14 @@ export default class ImageTools extends React.Component {
       width: 30,
       height: 10,
       aspect: 16/9
-    }
+    };
 
     return (
       <div className="image-tools">
-        <ReactCrop className="preview-image" src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} crop={this.state.crop} onComplete={this.cropUpdate}/>
+        <ReactCrop className="preview-image"
+          src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`}
+          crop={this.state.crop} onChange={this.cropUpdate}
+        />
         <div className="image-tool-bar">
         <h3>{this.state.crop.width} x {this.state.crop.height}, {this.state.crop.aspect.toFixed(2)}</h3>
           <form onChange={this.updateValues}>
@@ -64,7 +67,6 @@ export default class ImageTools extends React.Component {
   }
 
   cropUpdate = (crop, pixelCrop) => {
-    console.log(crop, pixelCrop);
     this.setState({crop: {
       x: pixelCrop.x,
       y: pixelCrop.y,
