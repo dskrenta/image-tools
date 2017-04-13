@@ -13,6 +13,13 @@ export default class ImageTools extends React.Component {
         sat: 100,
         con: 0
       },
+      crop: {
+        x: 20,
+        y: 10,
+        width: 30,
+        height: 10,
+        aspect: 16/9
+      },
       editSpec: 'brt100-sat100-con0x100',
       id: 'S5V10IJO9MAS1NJ1'
     };
@@ -23,30 +30,22 @@ export default class ImageTools extends React.Component {
   }
 
   render() {
-    /*
+    const defaultCrop = {
+      x: 20,
+      y: 10,
+      width: 30,
+      height: 10,
+      aspect: 16/9
+    };
+
     return (
       <div className="image-tools">
-        <div className="menu">
-          <div className="content-wrap">
-            <form onChange={this.updateValues}>
-              <label>Brightness {this.state.values.brt}%</label>
-              <input type="range" data-type="brt" value={this.state.values.brt} min="100" max="300"></input>
-              <label>Saturation {this.state.values.sat}%</label>
-              <input type="range" data-type="sat" value={this.state.values.sat} min="100" max="300"></input>
-              <label>Contrast {this.state.values.con}%</label>
-              <input type="range" data-type="con" value={this.state.values.con} min="0" max="50"></input>
-            </form>
-            <button onClick={this.reset}>Reset</button>
-          </div>
-        </div>
-        <ReactCrop className="preview-image" src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} />
-      </div>
-    );
-    */
-    return (
-      <div className="image-tools">
-        <ReactCrop className="preview-image" src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`} />
+        <ReactCrop className="preview-image"
+          src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`}
+          crop={this.state.crop} onChange={this.cropUpdate}
+        />
         <div className="image-tool-bar">
+        <h3>{this.state.crop.width} x {this.state.crop.height}, {this.state.crop.aspect.toFixed(2)}</h3>
           <form onChange={this.updateValues}>
             <div>
               <input type="range" data-type="brt" value={this.state.values.brt} min="100" max="300"></input>
@@ -65,6 +64,16 @@ export default class ImageTools extends React.Component {
         </div>
       </div>
     );
+  }
+
+  cropUpdate = (crop, pixelCrop) => {
+    this.setState({crop: {
+      x: pixelCrop.x,
+      y: pixelCrop.y,
+      width: pixelCrop.width,
+      height: pixelCrop.height,
+      aspect: crop.aspect
+    }});
   }
 
   reset = (event) => {
