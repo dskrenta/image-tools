@@ -42,8 +42,7 @@ export default class ImageTools extends React.Component {
       <div className="image-tools">
         <ReactCrop className="preview-image"
           src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`}
-          crop={this.state.crop} onChange={this.cropUpdate}
-        />
+          crop={this.state.crop} onChange={this.cropUpdate} />
         <div className="image-tool-bar">
         <h3>{this.state.crop.width} x {this.state.crop.height}, {this.state.crop.aspect.toFixed(2)}</h3>
           <form onChange={this.updateValues}>
@@ -66,23 +65,38 @@ export default class ImageTools extends React.Component {
     );
   }
 
+  // function to convert x, y, width, height for base image size to preview image size
+
+  // callback on update to spec
+
   cropUpdate = (crop, pixelCrop) => {
-    this.setState({crop: {
-      x: pixelCrop.x,
-      y: pixelCrop.y,
-      width: pixelCrop.width,
-      height: pixelCrop.height,
-      aspect: crop.aspect
-    }});
+    this.setState({
+      crop: {
+        x: pixelCrop.x,
+        y: pixelCrop.y,
+        width: pixelCrop.width,
+        height: pixelCrop.height,
+        aspect: crop.aspect
+      }
+    });
   }
 
   reset = (event) => {
     this.updateEditSpec();
   }
 
+  done = (event) => {
+    this.props.cb();
+  }
+
+  createEditSpec () {
+    return `brt${values.brt}-sat${values.sat}-con${values.con}x${100 - values.con}`;
+  }
+
   updateEditSpec = (values = {brt: 100, sat: 100, con: 0}) => {
     const editSpec = `brt${values.brt}-sat${values.sat}-con${values.con}x${100 - values.con}`;
     this.setState({values: values, editSpec: editSpec});
+    this.props.cb(editSpec);
   }
 
   updateValues = (event) => {
