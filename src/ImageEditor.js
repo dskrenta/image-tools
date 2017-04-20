@@ -60,6 +60,23 @@ export default class ImageEditor extends React.Component {
     );
   }
 
+  /*
+  parseEditSpec (editSpec) {
+    const specList = editSpec.split('-');
+    for (let spec of specList) {
+      if (!) {
+
+      }
+    }
+    console.log(specList.map(item => {
+      if(!item.startsWith('cp')) {
+        return item;
+      }
+    }));
+    console.log(specList.join('-'));
+  }
+  */
+
   onImageLoaded = (crop, image, pixelCrop) => {
     this.setState({pixelCrop: pixelCrop});
   }
@@ -120,5 +137,5 @@ export default class ImageEditor extends React.Component {
 ImageEditor.propTypes = {
   id: PropTypes.string.isRequired,
   cb: PropTypes.func.isRequired,
-  editSpec: PropTypes.object
+  editSpec: PropTypes.string
 };
