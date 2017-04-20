@@ -1,3 +1,5 @@
+@import 'ReactCrop.css';
+
 .preview-image {
   // object-fit: contain;
   object-position: center;

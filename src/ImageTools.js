@@ -2,7 +2,7 @@ import React from 'react';
 import './ImageTools.css';
 import ReactCrop from 'react-image-crop';
 // import '../node_modules/react-image-crop/dist/ReactCrop.css';
-import './ReactCrop.css';
+// import './ReactCrop.css';
 
 const DEFAULT_CROP = {
   x: 20,
@@ -40,7 +40,7 @@ export default class ImageTools extends React.Component {
           crop={this.state.crop} onChange={this.cropUpdate} />
         <div className="menu">
           <div className="content-wrap">
-            <h3>{this.state.crop.width} x {this.state.crop.height}, {this.state.crop.aspect.toFixed(2)}</h3>
+            {this.valuesDisplay()}
             <form onChange={this.updateValues}>
               <div>
                 <input type="range" data-type="brt" value={this.state.values.brt} min="100" max="300"></input>
@@ -63,11 +63,19 @@ export default class ImageTools extends React.Component {
     );
   }
 
+  valuesDisplay () {
+    if (this.state.pixelCrop) {
+      return (
+        <h3>{this.state.pixelCrop.width} x {this.state.pixelCrop.height}, {this.state.crop.aspect.toFixed(2)}</h3>
+      );
+    }
+  }
+
   // function to convert x, y, width, height for base image size to preview image size
 
   cropUpdate = (crop, pixelCrop) => {
     this.setState({
-      crop: {
+      pixelCrop: {
         x: pixelCrop.x,
         y: pixelCrop.y,
         width: pixelCrop.width,
@@ -89,7 +97,10 @@ export default class ImageTools extends React.Component {
   }
 
   createFinalEditSpec () {
-    const cropParam = `cp${this.state.crop.x}x${this.state.crop.y}x${this.state.crop.width}x${this.state.crop.height}`;
+    let cropParam = '';
+    if (this.state.pixelCrop) {
+      cropParam = `cp${this.state.pixelCrop.x}x${this.state.pixelCrop.y}x${this.state.pixelCrop.width}x${this.state.pixelCrop.height}`;
+    }
     return `brt${this.state.values.brt}-sat${this.state.values.sat}-con${this.state.values.con}x${100 - this.state.values.con}-${cropParam}`;
   }
 
