@@ -1,0 +1,17 @@
+@import 'ReactCrop.css';
+
+.menu {
+  width: 170px;
+  height: 100vh;
+  float: right;
+  vertical-align: middle;
+  text-align: right;
+  background-color: #f8f8f8;
+}
+
+.content-wrap {
+  margin-right: 1em;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
