@@ -4,10 +4,10 @@ import ReactCrop from 'react-image-crop';
 import PropTypes from 'prop-types';
 
 const DEFAULT_CROP = {
-  x: 20,
+  x: 10,
   y: 10,
-  width: 30,
-  height: 10,
+  width: 80,
+  height: 50,
   aspect: 16/9
 };
 const DEFAULT_VALUES = {
@@ -115,9 +115,9 @@ export default class ImageEditor extends React.Component {
   createFinalEditSpec () {
     let cropParam = '';
     if (this.state.pixelCrop) {
-      cropParam = `cp${this.state.pixelCrop.x}x${this.state.pixelCrop.y}x${this.state.pixelCrop.width}x${this.state.pixelCrop.height}`;
+      cropParam = `-cp${this.state.pixelCrop.x}x${this.state.pixelCrop.y}x${this.state.pixelCrop.width}x${this.state.pixelCrop.height}`;
     }
-    return `brt${this.state.values.brt}-sat${this.state.values.sat}-con${this.state.values.con}x${100 - this.state.values.con}-${cropParam}`;
+    return `brt${this.state.values.brt}-sat${this.state.values.sat}-con${this.state.values.con}x${100 - this.state.values.con}${cropParam}`;
   }
 
   updateEditSpec = (values = {brt: 100, sat: 100, con: 0}) => {
