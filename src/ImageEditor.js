@@ -27,6 +27,12 @@ export default class ImageEditor extends React.Component {
       id: this.props.id
     };
     this.previewCrop = DEFAULT_CROP;
+    this.imageLoadedResolve, this.imageLoadedReject;
+    this.imageLoaded = new Promise((resolve, reject) => {
+      this.imageLoadedResolve = resolve;
+      this.imageLoadedReject = reject;
+    });
+    this.customEditSpecPattern();
   }
 
   render() {
@@ -58,6 +64,15 @@ export default class ImageEditor extends React.Component {
         </div>
       </div>
     );
+  }
+
+  async customEditSpecPattern () {
+    try {
+      let imageDimensions = await this.imageLoaded;
+      console.log('imageLoaded', imageDimensions);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   parseEditSpec (editSpec) {
@@ -97,6 +112,7 @@ export default class ImageEditor extends React.Component {
   }
 
   onImageLoaded = (crop, image, pixelCrop) => {
+    // this.imageLoadedResolve();
     this.imageDimensions = {
       naturalWidth: image.naturalWidth,
       naturalHeight: image.naturalHeight,
@@ -104,6 +120,7 @@ export default class ImageEditor extends React.Component {
       height: image.clientHeight,
       aspect: image.clientWidth / image.clientHeight
     };
+    this.imageLoadedResolve(this.imageDimensions);
     if (this.propCropObj) {
       const convertedCrop = this.convertCropValues(this.propCropObj, this.imageDimensions);
       console.log(convertedCrop, this.propCropObj);
