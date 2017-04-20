@@ -2,6 +2,7 @@
   "name": "image-tools",
   "version": "0.0.0",
   "dependencies": {
+    "prop-types": "^15.5.8",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-image-crop": "^2.0.3"

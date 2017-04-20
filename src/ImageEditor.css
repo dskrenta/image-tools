@@ -1,16 +1,5 @@
 @import 'ReactCrop.css';
 
-.preview-image {
-  // object-fit: contain;
-  object-position: center;
-  width: 400px;
-  // width: calc(100vw - 170px);
-  // height: 100vh;
-  float: left;
-  position: absolute;
-  display: block;
-}
-
 .menu {
   width: 170px;
   height: 100vh;

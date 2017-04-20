@@ -1,8 +1,7 @@
 import React from 'react';
-import './ImageTools.css';
+import './ImageEditor.css';
 import ReactCrop from 'react-image-crop';
-// import '../node_modules/react-image-crop/dist/ReactCrop.css';
-// import './ReactCrop.css';
+import PropTypes from 'prop-types';
 
 const DEFAULT_CROP = {
   x: 20,
@@ -11,31 +10,29 @@ const DEFAULT_CROP = {
   height: 10,
   aspect: 16/9
 };
+const DEFAULT_VALUES = {
+  brt: 100,
+  sat: 100,
+  con: 0
+};
+const DEFAULT_EDIT_SPEC = 'brt100-sat100-con0x100';
 
-export default class ImageTools extends React.Component {
+export default class ImageEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      values: {
-        brt: 100,
-        sat: 100,
-        con: 0
-      },
+      values: DEFAULT_VALUES,
       crop: DEFAULT_CROP,
-      editSpec: 'brt100-sat100-con0x100',
-      id: 'S5V10IJO9MAS1NJ1'
+      editSpec: this.props.editSpec || DEFAULT_EDIT_SPEC,
+      id: this.props.id
     };
     this.previewCrop = DEFAULT_CROP;
-  }
-
-  componentDidUpdate() {
-    // cb
   }
 
   render() {
     return (
       <div className="image-tools">
-        <ReactCrop className="preview-image"
+        <ReactCrop className="preview-image" onImageLoaded={this.onImageLoaded}
           src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`}
           crop={this.state.crop} onChange={this.cropUpdate} />
         <div className="menu">
@@ -63,6 +60,10 @@ export default class ImageTools extends React.Component {
     );
   }
 
+  onImageLoaded = (crop, image, pixelCrop) => {
+    this.setState({pixelCrop: pixelCrop});
+  }
+
   valuesDisplay () {
     if (this.state.pixelCrop) {
       return (
@@ -70,8 +71,6 @@ export default class ImageTools extends React.Component {
       );
     }
   }
-
-  // function to convert x, y, width, height for base image size to preview image size
 
   cropUpdate = (crop, pixelCrop) => {
     this.setState({
@@ -117,3 +116,9 @@ export default class ImageTools extends React.Component {
     this.updateEditSpec(values);
   }
 }
+
+ImageEditor.propTypes = {
+  id: PropTypes.string.isRequired,
+  cb: PropTypes.func.isRequired,
+  editSpec: PropTypes.object
+};

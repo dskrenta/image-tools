@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ImageTools from './ImageTools';
+import ImageEditor from './ImageEditor';
 import './index.css';
 
 const cb = (result) => {
@@ -8,6 +8,6 @@ const cb = (result) => {
 };
 
 ReactDOM.render(
-  <ImageTools cb={cb}/>,
+  <ImageEditor id="S5V10IJO9MAS1NJ1" cb={cb}/>,
   document.getElementById('root')
 );
