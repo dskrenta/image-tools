@@ -23,7 +23,7 @@ export default class ImageEditor extends React.Component {
     this.state = {
       values: DEFAULT_VALUES,
       crop: DEFAULT_CROP,
-      editSpec: this.props.editSpec || DEFAULT_EDIT_SPEC,
+      editSpec: this.parseEditSpec(this.props.editSpec) || DEFAULT_EDIT_SPEC,
       id: this.props.id
     };
     this.previewCrop = DEFAULT_CROP;
@@ -60,29 +60,62 @@ export default class ImageEditor extends React.Component {
     );
   }
 
-  /*
   parseEditSpec (editSpec) {
-    const specList = editSpec.split('-');
-    for (let spec of specList) {
-      if (!) {
-
+    let cpIndex = null;
+    const specs = editSpec.split('-');
+    const returnSpec = specs.filter(spec => {
+      if (spec.startsWith('cp')) {
+        cpIndex = specs.indexOf(spec);
+        return false;
+      } else {
+        return true;
       }
-    }
-    console.log(specList.map(item => {
-      if(!item.startsWith('cp')) {
-        return item;
-      }
-    }));
-    console.log(specList.join('-'));
+    }).join('-');
+    this.parseCrop(specs[cpIndex]);
+    return returnSpec;
   }
-  */
+
+  parseCrop (cropSpec) {
+    let values = Array.from(cropSpec).slice(2).join('').split('x');
+    this.propCropObj = {
+      x: values[0],
+      y: values[1],
+      width: values[2],
+      height: values[3]
+    };
+  }
+
+  convertCropValues (crop, imageDimensions) {
+    const cropObj = {
+      x: Math.round((crop.x / imageDimensions.naturalWidth) * imageDimensions.width),
+      y: Math.round((crop.y / imageDimensions.naturalHeight) * imageDimensions.height),
+      width: Math.round((crop.width / imageDimensions.naturalWidth) * imageDimensions.width),
+      height: Math.round((crop.height / imageDimensions.naturalHeight) * imageDimensions.height)
+    };
+    cropObj.aspect = cropObj.width / cropObj.height;
+    return cropObj;
+  }
 
   onImageLoaded = (crop, image, pixelCrop) => {
-    this.setState({pixelCrop: pixelCrop});
+    this.imageDimensions = {
+      naturalWidth: image.naturalWidth,
+      naturalHeight: image.naturalHeight,
+      width: image.clientWidth,
+      height: image.clientHeight,
+      aspect: image.clientWidth / image.clientHeight
+    };
+    if (this.propCropObj) {
+      const convertedCrop = this.convertCropValues(this.propCropObj, this.imageDimensions);
+      console.log(convertedCrop, this.propCropObj);
+      this.setState({crop: convertedCrop});
+      this.setState({pixelCrop: this.propCropObj});
+    } else {
+      this.setState({pixelCrop: pixelCrop});
+    }
   }
 
   valuesDisplay () {
-    if (this.state.pixelCrop) {
+    if (this.state.pixelCrop && this.state.crop.aspect) {
       return (
         <h3>{this.state.pixelCrop.width} x {this.state.pixelCrop.height}, {this.state.crop.aspect.toFixed(2)}</h3>
       );
