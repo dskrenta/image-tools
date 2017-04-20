@@ -1,13 +1,9 @@
-.image-tools {
-  width: 500px;
-  height: 500px;
-}
-/*
 .preview-image {
-  object-fit: contain;
+  // object-fit: contain;
   object-position: center;
-  width: calc(100vw - 170px);
-  height: 100vh;
+  width: 400px;
+  // width: calc(100vw - 170px);
+  // height: 100vh;
   float: left;
   position: absolute;
   display: block;
@@ -27,17 +23,4 @@
   position: relative;
   top: 50%;
   transform: translateY(-50%);
-}
-*/
-
-.image-tool-bar {
-  background-color: #f8f8f8;
-  width: 500px;
-  height: 150px;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  -webkit-align-items: flex-start;
-  align-items: flex-start;
 }
