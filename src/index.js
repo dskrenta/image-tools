@@ -8,6 +8,6 @@ const cb = (result) => {
 };
 
 ReactDOM.render(
-  <ImageEditor id="S5V10IJO9MAS1NJ1" editSpec="brt100-sat100-con0x100-cp365x0x1235x694" cb={cb}/>,
+  <ImageEditor id="S5V10IJO9MAS1NJ1" editSpec="brt100-sat100-con0x100-cp0x300x1600x900" cb={cb}/>,
   document.getElementById('root')
 );

@@ -26,13 +26,13 @@ export default class ImageEditor extends React.Component {
       editSpec: this.parseEditSpec(this.props.editSpec) || DEFAULT_EDIT_SPEC,
       id: this.props.id
     };
-    this.previewCrop = DEFAULT_CROP;
+    this.baseResetCrop = DEFAULT_CROP;
     this.imageLoadedResolve, this.imageLoadedReject;
     this.imageLoaded = new Promise((resolve, reject) => {
       this.imageLoadedResolve = resolve;
       this.imageLoadedReject = reject;
     });
-    this.customEditSpecPattern();
+    this.editSpecPattern();
   }
 
   render() {
@@ -66,10 +66,16 @@ export default class ImageEditor extends React.Component {
     );
   }
 
-  async customEditSpecPattern () {
+  async editSpecPattern () {
     try {
-      let imageDimensions = await this.imageLoaded;
-      console.log('imageLoaded', imageDimensions);
+      if (this.cropValuesSpec) {
+        let imageDimensions = await this.imageLoaded;
+        let propCropObj = this.parseCrop(this.cropValuesSpec);
+        const convertedCrop = this.convertCropValues(propCropObj, imageDimensions);
+        this.baseResetCrop = convertedCrop;
+        this.setState({crop: convertedCrop});
+        this.setState(this.state);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -86,13 +92,13 @@ export default class ImageEditor extends React.Component {
         return true;
       }
     }).join('-');
-    this.parseCrop(specs[cpIndex]);
+    this.cropValuesSpec = specs[cpIndex];
     return returnSpec;
   }
 
   parseCrop (cropSpec) {
     let values = Array.from(cropSpec).slice(2).join('').split('x');
-    this.propCropObj = {
+    return {
       x: values[0],
       y: values[1],
       width: values[2],
@@ -101,18 +107,16 @@ export default class ImageEditor extends React.Component {
   }
 
   convertCropValues (crop, imageDimensions) {
-    const cropObj = {
+    return {
       x: Math.round((crop.x / imageDimensions.naturalWidth) * imageDimensions.width),
       y: Math.round((crop.y / imageDimensions.naturalHeight) * imageDimensions.height),
       width: Math.round((crop.width / imageDimensions.naturalWidth) * imageDimensions.width),
-      height: Math.round((crop.height / imageDimensions.naturalHeight) * imageDimensions.height)
+      height: Math.round((crop.height / imageDimensions.naturalHeight) * imageDimensions.height),
+      aspect: crop.width / crop.height
     };
-    cropObj.aspect = cropObj.width / cropObj.height;
-    return cropObj;
   }
 
   onImageLoaded = (crop, image, pixelCrop) => {
-    // this.imageLoadedResolve();
     this.imageDimensions = {
       naturalWidth: image.naturalWidth,
       naturalHeight: image.naturalHeight,
@@ -121,14 +125,7 @@ export default class ImageEditor extends React.Component {
       aspect: image.clientWidth / image.clientHeight
     };
     this.imageLoadedResolve(this.imageDimensions);
-    if (this.propCropObj) {
-      const convertedCrop = this.convertCropValues(this.propCropObj, this.imageDimensions);
-      console.log(convertedCrop, this.propCropObj);
-      this.setState({crop: convertedCrop});
-      this.setState({pixelCrop: this.propCropObj});
-    } else {
-      this.setState({pixelCrop: pixelCrop});
-    }
+    this.setState({pixelCrop: pixelCrop});
   }
 
   valuesDisplay () {
@@ -149,12 +146,10 @@ export default class ImageEditor extends React.Component {
         aspect: crop.aspect
       }
     });
-    this.previewCrop = crop;
   }
 
   reset = (event) => {
-    this.setState({crop: DEFAULT_CROP});
-    this.previewCrop = DEFAULT_CROP;
+    this.setState({crop: this.baseResetCrop});
     this.updateEditSpec();
   }
 
@@ -172,7 +167,7 @@ export default class ImageEditor extends React.Component {
 
   updateEditSpec = (values = {brt: 100, sat: 100, con: 0}) => {
     const editSpec = `brt${values.brt}-sat${values.sat}-con${values.con}x${100 - values.con}`;
-    this.setState({values: values, editSpec: editSpec, crop: this.previewCrop});
+    this.setState({values: values, editSpec: editSpec});
   }
 
   updateValues = (event) => {
