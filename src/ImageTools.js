@@ -58,15 +58,15 @@ export default class ImageTools extends React.Component {
             {this.valuesDisplay()}
             <form onChange={this.updateValues}>
               <div>
-                <input type="range" data-type="brt" value={this.state.values.brt} min="100" max="300"></input>
+                <input type="range" data-type="brt" key={this.state.values.brt} defaultValue={this.state.values.brt} min="100" max="300"></input>
                 <label>Brightness {this.state.values.brt}%</label>
               </div>
               <div>
-                <input type="range" data-type="sat" value={this.state.values.sat} min="100" max="300"></input>
+                <input type="range" data-type="sat" key={this.state.values.brt} defaultValue={this.state.values.sat} min="100" max="300"></input>
                 <label>Saturation {this.state.values.sat}%</label>
               </div>
               <div>
-                <input type="range" data-type="con" value={this.state.values.con} min="0" max="50"></input>
+                <input type="range" data-type="con" key={this.state.values.brt} defaultValue={this.state.values.con} min="0" max="50"></input>
                 <label>Contrast {this.state.values.con}%</label>
               </div>
             </form>
