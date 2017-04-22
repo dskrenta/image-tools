@@ -121,7 +121,7 @@ export default class ImageTools extends React.Component {
       width: (crop.width / baseDimensions.width) * 100,
       height: (crop.height / baseDimensions.height) * 100,
       aspect: crop.width / crop.height
-    }
+    };
   }
 
   parseEditSpec(editSpec) {
