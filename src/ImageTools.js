@@ -84,7 +84,7 @@ export default class ImageTools extends React.Component {
         await this.imageLoaded;
         let propCropObj = this.parseCrop(this.cropValuesSpec);
         const convertedCrop = this.convertCropScale(propCropObj, this.imageDimensions.natural, this.imageDimensions.display);
-        const convertedCropValues = this.convertPixPer(convertedCrop, this.imageDimensions.display);
+        const convertedCropValues = this.convertPixelToPercent(convertedCrop, this.imageDimensions.display);
         this.baseResetCrop = convertedCropValues;
         this.setState({crop: convertedCropValues});
         this.setState(this.state);
@@ -104,7 +104,7 @@ export default class ImageTools extends React.Component {
     };
   }
 
-  convertPerPix(crop, baseDimensions) {
+  convertPercentToPixel(crop, baseDimensions) {
     return {
       x: (crop.x / 100) * baseDimensions.width,
       y: (crop.y / 100) * baseDimensions.height,
@@ -114,7 +114,7 @@ export default class ImageTools extends React.Component {
     };
   }
 
-  convertPixPer(crop, baseDimensions) {
+  convertPixelToPercent(crop, baseDimensions) {
     return {
       x: (crop.x / baseDimensions.width) * 100,
       y: (crop.y / baseDimensions.height) * 100,
@@ -198,7 +198,7 @@ export default class ImageTools extends React.Component {
   createFinalEditSpec() {
     let cropParam = '';
     if (this.imageDimensions && this.state.crop) {
-      const convertedCropValues = this.convertPerPix(this.state.crop, this.imageDimensions.display);
+      const convertedCropValues = this.convertPercentToPixel(this.state.crop, this.imageDimensions.display);
       const naturalCrop = this.convertCropScale(convertedCropValues, this.imageDimensions.display ,this.imageDimensions.natural);
       cropParam = `-cp${naturalCrop.x}x${naturalCrop.y}x${naturalCrop.width + naturalCrop.x}x${naturalCrop.height + naturalCrop.y}`;
     }
