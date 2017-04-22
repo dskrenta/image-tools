@@ -155,8 +155,8 @@ export default class ImageTools extends React.Component {
     return {
       x: values[0],
       y: values[1],
-      width: values[2],
-      height: values[3]
+      width: values[2] - values[0],
+      height: values[3] - values[1]
     };
   }
 
