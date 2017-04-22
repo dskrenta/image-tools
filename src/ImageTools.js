@@ -100,7 +100,7 @@ export default class ImageTools extends React.Component {
       y: Math.round((crop.y / baseDimensions.height) * newDimensions.height),
       width: Math.round((crop.width / baseDimensions.width) * newDimensions.width),
       height: Math.round((crop.height / baseDimensions.height) * newDimensions.height),
-      // aspect: crop.width / crop.height
+      aspect: crop.width / crop.height
     };
   }
 
@@ -110,7 +110,7 @@ export default class ImageTools extends React.Component {
       y: (crop.y / 100) * baseDimensions.height,
       width: (crop.width / 100) * baseDimensions.width,
       height: (crop.height / 100) * baseDimensions.height,
-      // aspect: crop.width / crop.height
+      aspect: crop.width / crop.height
     };
   }
 
@@ -120,7 +120,7 @@ export default class ImageTools extends React.Component {
       y: (crop.y / baseDimensions.height) * 100,
       width: (crop.width / baseDimensions.width) * 100,
       height: (crop.height / baseDimensions.height) * 100,
-      // aspect: crop.width / crop.height
+      aspect: crop.width / crop.height
     }
   }
 

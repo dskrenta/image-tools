@@ -9,6 +9,6 @@ const cb = (result) => {
 };
 
 ReactDOM.render(
-  <ImageTools id="S5V10IJO9MAS1NJ1" editSpec="brt100-sat100-con0x100-cp397x45x1376x695" cb={cb}/>,
+  <ImageTools id="S5V10IJO9MAS1NJ1" editSpec="brt100-sat100-con0x100-cp397x45x1376x695" aspectLock={false} cb={cb}/>,
   document.getElementById('root')
 );
