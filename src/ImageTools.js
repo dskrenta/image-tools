@@ -3,6 +3,13 @@ import './ImageEditor.css';
 import ReactCrop from 'react-image-crop';
 import PropTypes from 'prop-types';
 
+/*
+  TODO:
+    - add option to lock or unlock aspect ratio
+    - change state values from prop edit spec
+    - add crop-tool functionality if array of partnercrops is passed
+*/
+
 const DEFAULT_CROP = {
   x: 10,
   y: 10,
@@ -16,6 +23,7 @@ const DEFAULT_VALUES = {
   con: 0
 };
 const DEFAULT_EDIT_SPEC = 'brt100-sat100-con0x100';
+const DEFAULT_ASPECT_LOCK = false;
 
 export default class ImageTools extends React.Component {
   constructor(props) {
@@ -27,6 +35,7 @@ export default class ImageTools extends React.Component {
       id: this.props.id
     };
     this.baseResetCrop = DEFAULT_CROP;
+    this.aspectLock = this.props.aspectLock || DEFAULT_ASPECT_LOCK;
     this.imageLoadedResolve = null;
     this.imageLoadedReject = null;
     this.imageLoaded = new Promise((resolve, reject) => {
@@ -72,30 +81,10 @@ export default class ImageTools extends React.Component {
   async editSpecPattern () {
     try {
       if (this.cropValuesSpec) {
-        // minus x and y out of crop width and height from prop editSpec
-        let imageDimensions = await this.imageLoaded;
+        await this.imageLoaded;
         let propCropObj = this.parseCrop(this.cropValuesSpec);
-        // const convertedCrop = this.convertCrop(propCropObj, imageDimensions);
-        // converting natural crop to display crop
-        const convertedCrop = this.convertCropScale(
-          propCropObj,
-          {
-            width: imageDimensions.naturalWidth,
-            height: imageDimensions.naturalHeight
-          },
-          {
-            width: imageDimensions.width,
-            height: imageDimensions.height
-          }
-        );
-        const convertedCropValues = this.convertPixPer(
-          convertedCrop,
-          {
-            width: imageDimensions.width,
-            height: imageDimensions.height
-          }
-        );
-        console.log(convertedCropValues);
+        const convertedCrop = this.convertCropScale(propCropObj, this.imageDimensions.natural, this.imageDimensions.display);
+        const convertedCropValues = this.convertPixPer(convertedCrop, this.imageDimensions.display);
         this.baseResetCrop = convertedCropValues;
         this.setState({crop: convertedCropValues});
         this.setState(this.state);
@@ -162,13 +151,17 @@ export default class ImageTools extends React.Component {
 
   onImageLoaded = (crop, image, pixelCrop) => {
     this.imageDimensions = {
-      naturalWidth: image.naturalWidth,
-      naturalHeight: image.naturalHeight,
-      width: image.clientWidth,
-      height: image.clientHeight,
+      natural: {
+        width: image.naturalWidth,
+        height: image.naturalHeight
+      },
+      display: {
+        width: image.clientWidth,
+        height: image.clientHeight
+      },
       aspect: image.clientWidth / image.clientHeight
-    };
-    this.imageLoadedResolve(this.imageDimensions);
+    }
+    this.imageLoadedResolve();
     this.setState({pixelCrop: pixelCrop});
   }
 
@@ -205,19 +198,8 @@ export default class ImageTools extends React.Component {
   createFinalEditSpec() {
     let cropParam = '';
     if (this.imageDimensions && this.state.crop) {
-      const baseDimensions = {
-        width: this.imageDimensions.width,
-        height: this.imageDimensions.height
-      };
-      const convertedCropValues = this.convertPerPix(this.state.crop, baseDimensions);
-      const naturalCrop = this.convertCropScale(
-        convertedCropValues,
-        baseDimensions,
-        {
-          width: this.imageDimensions.naturalWidth,
-          height: this.imageDimensions.naturalHeight
-        }
-      );
+      const convertedCropValues = this.convertPerPix(this.state.crop, this.imageDimensions.display);
+      const naturalCrop = this.convertCropScale(convertedCropValues, this.imageDimensions.display ,this.imageDimensions.natural);
       cropParam = `-cp${naturalCrop.x}x${naturalCrop.y}x${naturalCrop.width + naturalCrop.x}x${naturalCrop.height + naturalCrop.y}`;
     }
     return `brt${this.state.values.brt}-sat${this.state.values.sat}-con${this.state.values.con}x${100 - this.state.values.con}${cropParam}`;
@@ -240,5 +222,6 @@ export default class ImageTools extends React.Component {
 ImageTools.propTypes = {
   id: PropTypes.string.isRequired,
   cb: PropTypes.func.isRequired,
+  aspectLock: PropTypes.bool,
   editSpec: PropTypes.string
 };
