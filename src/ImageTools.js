@@ -85,7 +85,10 @@ export default class ImageTools extends React.Component {
   imageDisplay() {
     if (this.cropTool) {
       return (
-        <img className="image" src={`${IMAGE_HOST}${this.state.id}`} onClick={this.updateGravityPosition} alt="preview" />
+        <div>
+          <img className="image" ref={this.setImagePosition} src={`${IMAGE_HOST}${this.state.id}`} onClick={this.updateGravityPosition} alt="preview" />
+          <span className="indicator" ref={this.setIndicatorPosition} onClick={this.updateGravityPosition}>X</span>
+        </div>
       );
     } else {
       return (
@@ -96,6 +99,21 @@ export default class ImageTools extends React.Component {
         />
       );
     }
+  }
+
+  setImagePosition = (event) => {
+    this.previewImage = ImageTools.createReference(event);
+  };
+
+  setIndicatorPosition = (event) => {
+    this.previewIndicator = ImageTools.createReference(event);
+  };
+
+  static createReference(element) {
+    return {
+      element: element,
+      position: ImageTools.getPosition(element)
+    };
   }
 
   scaleDisplay() {
@@ -114,13 +132,11 @@ export default class ImageTools extends React.Component {
     const obj = this.state.gravity;
     obj.scale = value / 100;
     this.setState({gravity: obj});
-    // console.log(this.state.gravity);
   };
 
   updateGravityPosition = (event) => {
     event.persist();
-    const imagePosition = ImageTools.getPosition(event.target);
-    console.log(imagePosition, event.clientX, event.clientY);
+    console.log(this.previewImage.position, event.clientX, event.clientY);
     // set gravity x and y accordingly
   };
 

@@ -20,3 +20,13 @@
   position: absolute;
   height: 300px;
 }
+
+.indicator {
+  top: 90px;
+  left: 90px;
+  position: relative;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 1px;
+}
