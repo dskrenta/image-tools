@@ -30,3 +30,7 @@
   background-color: red;
   border-radius: 1px;
 }
+
+.display-crop {
+  height: 200px;
+}

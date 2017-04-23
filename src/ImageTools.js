@@ -40,7 +40,8 @@ export default class ImageTools extends React.Component {
       gravity: DEFAULT_GRAVITY,
       crop: DEFAULT_CROP,
       editSpec: this.parseEditSpec(this.props.editSpec) || DEFAULT_EDIT_SPEC,
-      id: this.props.id
+      id: this.props.id,
+      displayCrops: null
     };
     this.baseResetCrop = DEFAULT_CROP;
     this.aspectLock = this.props.aspectLock || DEFAULT_ASPECT_LOCK;
@@ -56,6 +57,7 @@ export default class ImageTools extends React.Component {
     return (
       <div className="image-tools">
         {this.imageDisplay()}
+        {this.cropDisplay()}
         <div className="menu">
           <div className="content-wrap">
             {this.valuesDisplay()}
@@ -82,6 +84,14 @@ export default class ImageTools extends React.Component {
     );
   }
 
+  cropDisplay() {
+    if (this.state.displayCrops && this.cropTool) {
+      this.state.displayCrops.map(imageUrl => {
+        return <img className="display-crop" src={imageUrl} alt="display-crop" />;
+      });
+    }
+  }
+
   imageDisplay() {
     if (this.cropTool) {
       const indicatorStyle = {
@@ -103,6 +113,89 @@ export default class ImageTools extends React.Component {
         />
       );
     }
+  }
+
+  calculateCropValues() {
+    this.finalCrops = this.cropTool.map(crop => {
+      crop.aspect = crop.width / crop.height;
+      let cWidth = 0;
+      let cHeight = 0;
+      let resizeWidth = this.previewImage.element.naturalWidth;
+      let resizeHeight = this.previewImage.element.naturalHeight;
+      const baseImageAspect = resizeWidth / resizeHeight;
+
+      if (baseImageAspect > 1) {
+        cHeight = resizeHeight;
+        cWidth = Math.round(crop.aspect * cHeight);
+
+        // oversize
+        let oversizeScale = cWidth / resizeWidth;
+        if (oversizeScale > 1) {
+          cHeight = resizeHeight / oversizeScale;
+          cWidth = Math.round(crop.aspect * cHeight);
+        }
+      } else {
+        cWidth = resizeWidth;
+        cHeight = Math.round(cWidth / crop.aspect);
+
+        // oversize
+        let oversizeScale = cHeight / resizeHeight;
+        if (oversizeScale > 1) {
+          cWidth = resizeWidth / oversizeScale;
+          cHeight = Math.round(cWidth / crop.aspect);
+        }
+      }
+
+      let gX = Math.round((this.state.gravity.x / this.previewImage.position.width) * resizeWidth);
+      let gY = Math.round((this.state.gravity.y / this.previewImage.position.height) * resizeHeight);
+
+      let cX = Math.round(gX * this.state.gravity.scale) - (0.5 * cWidth);
+      let cY = Math.round(gY * this.state.gravity.scale) - (0.5 * cHeight);
+
+      resizeWidth = Math.round(resizeWidth * this.state.gravity.scale);
+      resizeHeight = Math.round(resizeHeight * this.state.gravity.scale);
+
+      if (cX < 0 ) {
+        cX = 0;
+      } else if (cX > (resizeWidth - cWidth)) {
+        cX = Math.round(resizeWidth - cWidth);
+      }
+
+      if (cY < 0) {
+        cY = 0;
+      } else if (cY > (resizeHeight - cHeight)) {
+        cY = Math.round(resizeHeight - cHeight);
+      }
+
+      cWidth += cX;
+      cHeight += cY;
+
+      const scaled = ImageTools.convertCropScale(
+        {
+          x: cX,
+          y: cY,
+          width: cWidth,
+          height: cHeight
+        },
+        {
+          width: resizeWidth,
+          height: resizeHeight
+        },
+        {
+          width: this.previewImage.element.naturalWidth,
+          height: this.previewImage.element.naturalHeight
+        }
+      );
+      const cropSpec = `cp${scaled.x}x${scaled.y}x${scaled.width}x${scaled.height}`;
+
+      return cropSpec;
+    });
+    this.generateDisplayCrops(this.finalCrops);
+    console.log(this.finalCrops);
+  }
+
+  generateDisplayCrops(specs) {
+    this.setState({displayCrops: specs.map(spec => `${IMAGE_HOST}${this.state.id}-${spec}`)});
   }
 
   setImagePosition = (event) => {
@@ -136,6 +229,7 @@ export default class ImageTools extends React.Component {
     const gravityObj = this.state.gravity;
     gravityObj.scale = value / 100;
     this.setState({gravity: gravityObj});
+    this.calculateCropValues();
   };
 
   updateGravityPosition = (event) => {
@@ -144,7 +238,7 @@ export default class ImageTools extends React.Component {
     gravityObj.x = event.clientX;
     gravityObj.y = event.clientY;
     this.setState({gravity: gravityObj});
-    console.log(this.previewImage.position, event.clientX, event.clientY);
+    this.calculateCropValues();
   };
 
   static convertCropScale(crop, baseDimensions, newDimensions) {
