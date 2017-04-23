@@ -8,7 +8,8 @@ import PropTypes from 'prop-types';
     - add option to lock or unlock aspect ratio
     - change state values from prop edit spec
     - add crop-tool functionality if array of partnercrops is passed
-    - take values from edit spec
+    - take values from edit spec when in crop-tool mode
+    - allow adjustments to automatic crop by clicking on display crop (preview)
 */
 
 const DEFAULT_EDIT_SPEC = 'brt100-sat100-con0x100';
