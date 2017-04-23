@@ -16,6 +16,12 @@
   transform: translateY(-50%);
 }
 
+.master-crop {
+  position: relative;
+  height: 300px;
+  padding-bottom: 5px;
+}
+
 .image {
   position: absolute;
   height: 300px;
@@ -33,4 +39,7 @@
 
 .display-crop {
   height: 200px;
+}
+
+.display-crop-container {
 }

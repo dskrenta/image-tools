@@ -56,8 +56,6 @@ export default class ImageTools extends React.Component {
   render() {
     return (
       <div className="image-tools">
-        {this.imageDisplay()}
-        {this.cropDisplay()}
         <div className="menu">
           <div className="content-wrap">
             {this.valuesDisplay()}
@@ -80,15 +78,21 @@ export default class ImageTools extends React.Component {
             <button onClick={this.done}>Done</button>
           </div>
         </div>
+        {this.imageDisplay()}
+        {this.cropDisplay()}
       </div>
     );
   }
 
   cropDisplay() {
     if (this.state.displayCrops && this.cropTool) {
-      this.state.displayCrops.map(imageUrl => {
-        return <img className="display-crop" src={imageUrl} alt="display-crop" />;
-      });
+      return (
+        <div className="display-crop-container">
+          {this.state.displayCrops.map((imageUrl, index) => {
+            return <img className="display-crop" key={index} src={imageUrl} alt="display-crop" />;
+          })}
+        </div>
+      );
     }
   }
 
@@ -99,7 +103,7 @@ export default class ImageTools extends React.Component {
         top: this.state.gravity.y
       };
       return (
-        <div>
+        <div className="master-crop">
           <img className="image" ref={this.setImagePosition} src={`${IMAGE_HOST}${this.state.id}`} onClick={this.updateGravityPosition} alt="preview" />
           <span className="indicator" ref={this.setIndicatorPosition} onClick={this.updateGravityPosition} style={indicatorStyle}>X</span>
         </div>
@@ -146,8 +150,8 @@ export default class ImageTools extends React.Component {
         }
       }
 
-      let gX = Math.round((this.state.gravity.x / this.previewImage.position.width) * resizeWidth);
-      let gY = Math.round((this.state.gravity.y / this.previewImage.position.height) * resizeHeight);
+      let gX = Math.round((this.state.gravity.x / this.previewImage.element.clientWidth) * resizeWidth);
+      let gY = Math.round((this.state.gravity.y / this.previewImage.element.clientHeight) * resizeHeight);
 
       let cX = Math.round(gX * this.state.gravity.scale) - (0.5 * cWidth);
       let cY = Math.round(gY * this.state.gravity.scale) - (0.5 * cHeight);
