@@ -87,7 +87,6 @@ export default class ImageTools extends React.Component {
         const convertedCropValues = this.convertPixelToPercent(convertedCrop, this.imageDimensions.display);
         this.baseResetCrop = convertedCropValues;
         this.setState({crop: convertedCropValues});
-        this.setState(this.state);
       }
     } catch (err) {
       console.error(err);
