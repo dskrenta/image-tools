@@ -15,3 +15,8 @@
   top: 50%;
   transform: translateY(-50%);
 }
+
+.image {
+  position: absolute;
+  height: 300px;
+}

@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
     - add option to lock or unlock aspect ratio
     - change state values from prop edit spec
     - add crop-tool functionality if array of partnercrops is passed
+    - take values from edit spec
 */
 
 const DEFAULT_EDIT_SPEC = 'brt100-sat100-con0x100';
@@ -25,18 +26,25 @@ const DEFAULT_VALUES = {
   sat: 100,
   con: 0
 };
+const DEFAULT_GRAVITY = {
+  x: 0,
+  y: 0,
+  scale: 1
+};
 
 export default class ImageTools extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       values: DEFAULT_VALUES,
+      gravity: DEFAULT_GRAVITY,
       crop: DEFAULT_CROP,
       editSpec: this.parseEditSpec(this.props.editSpec) || DEFAULT_EDIT_SPEC,
       id: this.props.id
     };
     this.baseResetCrop = DEFAULT_CROP;
     this.aspectLock = this.props.aspectLock || DEFAULT_ASPECT_LOCK;
+    this.cropTool = this.props.partnerCrops ? this.props.partnerCrops : false;
     this.imageLoaded = new Promise((resolve, reject) => {
       this.imageLoadedResolve = resolve;
       this.imageLoadedReject = reject;
@@ -47,34 +55,73 @@ export default class ImageTools extends React.Component {
   render() {
     return (
       <div className="image-tools">
-        <ReactCrop
-          className="preview-image" onImageLoaded={this.onImageLoaded}
-          src={`${IMAGE_HOST}${this.state.id}-${this.state.editSpec}`}
-          crop={this.state.crop} onChange={this.cropUpdate}
-        />
+        {this.imageDisplay()}
         <div className="menu">
           <div className="content-wrap">
             {this.valuesDisplay()}
             <form onChange={this.updateValues}>
               <div>
-                <input type="range" data-type="brt" key={this.state.values.brt} defaultValue={this.state.values.brt} min="100" max="300"></input>
                 <label>Brightness {this.state.values.brt}%</label>
+                <input type="range" data-type="brt" key={this.state.values.brt} defaultValue={this.state.values.brt} min="100" max="300"></input>
               </div>
               <div>
-                <input type="range" data-type="sat" key={this.state.values.sat} defaultValue={this.state.values.sat} min="100" max="300"></input>
                 <label>Saturation {this.state.values.sat}%</label>
+                <input type="range" data-type="sat" key={this.state.values.sat} defaultValue={this.state.values.sat} min="100" max="300"></input>
               </div>
               <div>
-                <input type="range" data-type="con" key={this.state.values.con} defaultValue={this.state.values.con} min="0" max="50"></input>
                 <label>Contrast {this.state.values.con}%</label>
+                <input type="range" data-type="con" key={this.state.values.con} defaultValue={this.state.values.con} min="0" max="50"></input>
               </div>
             </form>
+            {this.scaleDisplay()}
             <button onClick={this.reset}>Reset</button>
             <button onClick={this.done}>Done</button>
           </div>
         </div>
       </div>
     );
+  }
+
+  imageDisplay() {
+    if (this.cropTool) {
+      return (
+        <img className="image" src={`${IMAGE_HOST}${this.state.id}`} onClick={this.updateGravityPosition} alt="preview" />
+      );
+    } else {
+      return (
+        <ReactCrop
+          className="preview-image" onImageLoaded={this.onImageLoaded}
+          src={`${IMAGE_HOST}${this.state.id}-${this.state.editSpec}`}
+          crop={this.state.crop} onChange={this.cropUpdate}
+        />
+      );
+    }
+  }
+
+  scaleDisplay() {
+    if (this.cropTool) {
+      return (
+        <div>
+          <label>Scale {Math.round(this.state.gravity.scale * 100)}%</label>
+          <input onChange={this.updateScale} type="range" value={this.state.gravity.scale * 100} max="500" min="100"></input>
+        </div>
+      );
+    }
+  }
+
+  updateScale = (event) => {
+    const value = event.target.value;
+    const obj = this.state.gravity;
+    obj.scale = value / 100;
+    this.setState({gravity: obj});
+    // console.log(this.state.gravity);
+  }
+
+  updateGravityPosition = (event) => {
+    event.persist();
+    const imagePosition = ImageTools.getPosition(event.target);
+    console.log(imagePosition, event.clientX, event.clientY);
+    // set gravity x and y accordingly
   }
 
   static convertCropScale(crop, baseDimensions, newDimensions) {
@@ -231,5 +278,9 @@ ImageTools.propTypes = {
   id: PropTypes.string.isRequired,
   cb: PropTypes.func.isRequired,
   aspectLock: PropTypes.bool,
-  editSpec: PropTypes.string
+  editSpec: PropTypes.string,
+  partnerCrops: PropTypes.arrayOf(PropTypes.shape({
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired
+  }))
 };
