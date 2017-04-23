@@ -115,14 +115,14 @@ export default class ImageTools extends React.Component {
     obj.scale = value / 100;
     this.setState({gravity: obj});
     // console.log(this.state.gravity);
-  }
+  };
 
   updateGravityPosition = (event) => {
     event.persist();
     const imagePosition = ImageTools.getPosition(event.target);
     console.log(imagePosition, event.clientX, event.clientY);
     // set gravity x and y accordingly
-  }
+  };
 
   static convertCropScale(crop, baseDimensions, newDimensions) {
     return {
@@ -218,7 +218,7 @@ export default class ImageTools extends React.Component {
     }
     this.imageLoadedResolve();
     this.setState({pixelCrop: pixelCrop});
-  }
+  };
 
   valuesDisplay() {
     if (this.state.pixelCrop && this.state.crop.aspect) {
@@ -239,16 +239,16 @@ export default class ImageTools extends React.Component {
       }
     });
     this.setState({crop: crop});
-  }
+  };
 
   reset = (event) => {
     this.setState({crop: this.baseResetCrop});
     this.updateEditSpec();
-  }
+  };
 
   done = (event) => {
     this.props.cb(this.createFinalEditSpec());
-  }
+  };
 
   createFinalEditSpec() {
     let cropParam = '';
@@ -263,7 +263,7 @@ export default class ImageTools extends React.Component {
   updateEditSpec = (values = {brt: 100, sat: 100, con: 0}) => {
     const editSpec = `brt${values.brt}-sat${values.sat}-con${values.con}x${100 - values.con}`;
     this.setState({values: values, editSpec: editSpec});
-  }
+  };
 
   updateValues = (event) => {
     const value = event.target.value;
@@ -271,7 +271,7 @@ export default class ImageTools extends React.Component {
     const values = this.state.values;
     values[type] = value;
     this.updateEditSpec(values);
-  }
+  };
 }
 
 ImageTools.propTypes = {
