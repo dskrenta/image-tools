@@ -84,10 +84,14 @@ export default class ImageTools extends React.Component {
 
   imageDisplay() {
     if (this.cropTool) {
+      const indicatorStyle = {
+        left: this.state.gravity.x,
+        top: this.state.gravity.y
+      };
       return (
         <div>
           <img className="image" ref={this.setImagePosition} src={`${IMAGE_HOST}${this.state.id}`} onClick={this.updateGravityPosition} alt="preview" />
-          <span className="indicator" ref={this.setIndicatorPosition} onClick={this.updateGravityPosition}>X</span>
+          <span className="indicator" ref={this.setIndicatorPosition} onClick={this.updateGravityPosition} style={indicatorStyle}>X</span>
         </div>
       );
     } else {
@@ -129,15 +133,18 @@ export default class ImageTools extends React.Component {
 
   updateScale = (event) => {
     const value = event.target.value;
-    const obj = this.state.gravity;
-    obj.scale = value / 100;
-    this.setState({gravity: obj});
+    const gravityObj = this.state.gravity;
+    gravityObj.scale = value / 100;
+    this.setState({gravity: gravityObj});
   };
 
   updateGravityPosition = (event) => {
     event.persist();
+    const gravityObj = this.state.gravity;
+    gravityObj.x = event.clientX;
+    gravityObj.y = event.clientY;
+    this.setState({gravity: gravityObj});
     console.log(this.previewImage.position, event.clientX, event.clientY);
-    // set gravity x and y accordingly
   };
 
   static convertCropScale(crop, baseDimensions, newDimensions) {
