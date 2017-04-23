@@ -10,6 +10,9 @@ import PropTypes from 'prop-types';
     - add crop-tool functionality if array of partnercrops is passed
 */
 
+const DEFAULT_EDIT_SPEC = 'brt100-sat100-con0x100';
+const DEFAULT_ASPECT_LOCK = false;
+const IMAGE_HOST = 'https://proxy.topixcdn.com/ipicimg/';
 const DEFAULT_CROP = {
   x: 10,
   y: 10,
@@ -22,8 +25,6 @@ const DEFAULT_VALUES = {
   sat: 100,
   con: 0
 };
-const DEFAULT_EDIT_SPEC = 'brt100-sat100-con0x100';
-const DEFAULT_ASPECT_LOCK = false;
 
 export default class ImageTools extends React.Component {
   constructor(props) {
@@ -48,7 +49,7 @@ export default class ImageTools extends React.Component {
       <div className="image-tools">
         <ReactCrop
           className="preview-image" onImageLoaded={this.onImageLoaded}
-          src={`http://proxy.topixcdn.com/ipicimg/${this.state.id}-${this.state.editSpec}`}
+          src={`${IMAGE_HOST}${this.state.id}-${this.state.editSpec}`}
           crop={this.state.crop} onChange={this.cropUpdate}
         />
         <div className="menu">
