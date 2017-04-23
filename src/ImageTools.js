@@ -198,7 +198,7 @@ export default class ImageTools extends React.Component {
     let cropParam = '';
     if (this.imageDimensions && this.state.crop) {
       const convertedCropValues = this.convertPercentToPixel(this.state.crop, this.imageDimensions.display);
-      const naturalCrop = this.convertCropScale(convertedCropValues, this.imageDimensions.display ,this.imageDimensions.natural);
+      const naturalCrop = this.convertCropScale(convertedCropValues, this.imageDimensions.display, this.imageDimensions.natural);
       cropParam = `-cp${naturalCrop.x}x${naturalCrop.y}x${naturalCrop.width + naturalCrop.x}x${naturalCrop.height + naturalCrop.y}`;
     }
     return `brt${this.state.values.brt}-sat${this.state.values.sat}-con${this.state.values.con}x${100 - this.state.values.con}${cropParam}`;
