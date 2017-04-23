@@ -36,8 +36,6 @@ export default class ImageTools extends React.Component {
     };
     this.baseResetCrop = DEFAULT_CROP;
     this.aspectLock = this.props.aspectLock || DEFAULT_ASPECT_LOCK;
-    this.imageLoadedResolve = null;
-    this.imageLoadedReject = null;
     this.imageLoaded = new Promise((resolve, reject) => {
       this.imageLoadedResolve = resolve;
       this.imageLoadedReject = reject;
@@ -62,11 +60,11 @@ export default class ImageTools extends React.Component {
                 <label>Brightness {this.state.values.brt}%</label>
               </div>
               <div>
-                <input type="range" data-type="sat" key={this.state.values.brt} defaultValue={this.state.values.sat} min="100" max="300"></input>
+                <input type="range" data-type="sat" key={this.state.values.sat} defaultValue={this.state.values.sat} min="100" max="300"></input>
                 <label>Saturation {this.state.values.sat}%</label>
               </div>
               <div>
-                <input type="range" data-type="con" key={this.state.values.brt} defaultValue={this.state.values.con} min="0" max="50"></input>
+                <input type="range" data-type="con" key={this.state.values.con} defaultValue={this.state.values.con} min="0" max="50"></input>
                 <label>Contrast {this.state.values.con}%</label>
               </div>
             </form>
@@ -78,22 +76,7 @@ export default class ImageTools extends React.Component {
     );
   }
 
-  async editSpecPattern () {
-    try {
-      if (this.cropValuesSpec) {
-        await this.imageLoaded;
-        let propCropObj = this.parseCrop(this.cropValuesSpec);
-        const convertedCrop = this.convertCropScale(propCropObj, this.imageDimensions.natural, this.imageDimensions.display);
-        const convertedCropValues = this.convertPixelToPercent(convertedCrop, this.imageDimensions.display);
-        this.baseResetCrop = convertedCropValues;
-        this.setState({crop: convertedCropValues});
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  convertCropScale(crop, baseDimensions, newDimensions) {
+  static convertCropScale(crop, baseDimensions, newDimensions) {
     return {
       x: Math.round((crop.x / baseDimensions.width) * newDimensions.width),
       y: Math.round((crop.y / baseDimensions.height) * newDimensions.height),
@@ -103,7 +86,7 @@ export default class ImageTools extends React.Component {
     };
   }
 
-  convertPercentToPixel(crop, baseDimensions) {
+  static convertPercentToPixel(crop, baseDimensions) {
     return {
       x: (crop.x / 100) * baseDimensions.width,
       y: (crop.y / 100) * baseDimensions.height,
@@ -113,7 +96,7 @@ export default class ImageTools extends React.Component {
     };
   }
 
-  convertPixelToPercent(crop, baseDimensions) {
+  static convertPixelToPercent(crop, baseDimensions) {
     return {
       x: (crop.x / baseDimensions.width) * 100,
       y: (crop.y / baseDimensions.height) * 100,
@@ -121,6 +104,31 @@ export default class ImageTools extends React.Component {
       height: (crop.height / baseDimensions.height) * 100,
       aspect: crop.width / crop.height
     };
+  }
+
+  static getPosition(element) {
+    const rect = element.getBoundingClientRect();
+    return {
+      x: rect.left,
+      y: rect.top,
+      width: rect.width,
+      height: rect.height
+    };
+  }
+
+  async editSpecPattern () {
+    try {
+      if (this.cropValuesSpec) {
+        await this.imageLoaded;
+        let propCropObj = this.parseCrop(this.cropValuesSpec);
+        const convertedCrop = ImageTools.convertCropScale(propCropObj, this.imageDimensions.natural, this.imageDimensions.display);
+        const convertedCropValues = ImageTools.convertPixelToPercent(convertedCrop, this.imageDimensions.display);
+        this.baseResetCrop = convertedCropValues;
+        this.setState({crop: convertedCropValues});
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   parseEditSpec(editSpec) {
@@ -197,8 +205,8 @@ export default class ImageTools extends React.Component {
   createFinalEditSpec() {
     let cropParam = '';
     if (this.imageDimensions && this.state.crop) {
-      const convertedCropValues = this.convertPercentToPixel(this.state.crop, this.imageDimensions.display);
-      const naturalCrop = this.convertCropScale(convertedCropValues, this.imageDimensions.display, this.imageDimensions.natural);
+      const convertedCropValues = ImageTools.convertPercentToPixel(this.state.crop, this.imageDimensions.display);
+      const naturalCrop = ImageTools.convertCropScale(convertedCropValues, this.imageDimensions.display, this.imageDimensions.natural);
       cropParam = `-cp${naturalCrop.x}x${naturalCrop.y}x${naturalCrop.width + naturalCrop.x}x${naturalCrop.height + naturalCrop.y}`;
     }
     return `brt${this.state.values.brt}-sat${this.state.values.sat}-con${this.state.values.con}x${100 - this.state.values.con}${cropParam}`;
