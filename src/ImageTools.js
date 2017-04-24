@@ -5,8 +5,6 @@ import ReactCrop from './ReactCrop';
 
 /*
   TODO:
-    - change state values from prop edit spec
-    - take values from edit spec when in crop-tool mode
     - allow adjustments to automatic crop by clicking on display crop (preview)
 */
 
@@ -66,6 +64,12 @@ export default class ImageTools extends React.Component {
       this.imageLoadedReject = reject;
     });
     this.editSpecPattern();
+  }
+
+  componentDidMount() {
+    if (this.passedValues) {
+      this.setState({values: this.passedValues});
+    }
   }
 
   cropDisplay() {
@@ -276,14 +280,21 @@ export default class ImageTools extends React.Component {
     }
   }
 
+  // needs refactoring
   parseEditSpec(editSpec) {
     let cpIndex = undefined;
+    this.passedValues = {};
     const specs = editSpec.split('-');
     const returnSpec = specs.filter(spec => {
       if (spec.startsWith('cp')) {
         cpIndex = specs.indexOf(spec);
         return false;
       } else {
+        const valueObj = {key: spec.slice(0, 3), value: spec.slice(3)};
+        if (valueObj.key === 'con') {
+          valueObj.value = valueObj.value.split('x').slice(0, 1).toString();
+        }
+        this.passedValues[valueObj.key] = valueObj.value;
         return true;
       }
     }).join('-');

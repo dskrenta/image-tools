@@ -18,7 +18,7 @@ const crops = [
 
 ReactDOM.render(
   <ImageTools
-    id="S5V10IJO9MAS1NJ1" editSpec="brt100-sat100-con0x100-cp397x45x1376x695"
+    id="S5V10IJO9MAS1NJ1" editSpec="brt187-sat215-con0x100-cp243x45x1465x856"
     aspectLock={true} cb={callback} // partnerCrops={crops}
   />,
   document.getElementById('root')
