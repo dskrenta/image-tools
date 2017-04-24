@@ -1,7 +1,8 @@
 import React from 'react';
-import './ImageEditor.css';
-import ReactCrop from 'react-image-crop';
+// import ReactCrop from 'react-image-crop';
 import PropTypes from 'prop-types';
+import Crop from './Crop';
+import './ImageEditor.css';
 
 /*
   TODO:
@@ -12,77 +13,86 @@ import PropTypes from 'prop-types';
     - allow adjustments to automatic crop by clicking on display crop (preview)
 */
 
-const DEFAULT_EDIT_SPEC = 'brt100-sat100-con0x100';
-const DEFAULT_ASPECT_LOCK = false;
-const IMAGE_HOST = 'https://proxy.topixcdn.com/ipicimg/';
-const DEFAULT_CROP = {
-  x: 10,
-  y: 10,
-  width: 80,
-  height: 50,
-  aspect: 16/9
-};
-const DEFAULT_VALUES = {
-  brt: 100,
-  sat: 100,
-  con: 0
-};
-const DEFAULT_GRAVITY = {
-  x: 0,
-  y: 0,
-  scale: 1
-};
-
 export default class ImageTools extends React.Component {
+  static propTypes = {
+    id: PropTypes.string.isRequired,
+    cb: PropTypes.func.isRequired,
+    aspectLock: PropTypes.bool,
+    editSpec: PropTypes.string,
+    partnerCrops: PropTypes.arrayOf(PropTypes.shape({
+      width: PropTypes.number.isRequired,
+      height: PropTypes.number.isRequired
+    }))
+  };
+
+  static defaultProps = {
+    aspectLock: false,
+    editSpec: 'brt100-sat100-con0x100'
+  };
+
+  static convertCropScale(crop, baseDimensions, newDimensions) {
+    return {
+      x: Math.round((crop.x / baseDimensions.width) * newDimensions.width),
+      y: Math.round((crop.y / baseDimensions.height) * newDimensions.height),
+      width: Math.round((crop.width / baseDimensions.width) * newDimensions.width),
+      height: Math.round((crop.height / baseDimensions.height) * newDimensions.height),
+      aspect: crop.width / crop.height
+    };
+  }
+
+  static convertPercentToPixel(crop, baseDimensions) {
+    return {
+      x: (crop.x / 100) * baseDimensions.width,
+      y: (crop.y / 100) * baseDimensions.height,
+      width: (crop.width / 100) * baseDimensions.width,
+      height: (crop.height / 100) * baseDimensions.height,
+      aspect: crop.width / crop.height
+    };
+  }
+
+  static convertPixelToPercent(crop, baseDimensions) {
+    return {
+      x: (crop.x / baseDimensions.width) * 100,
+      y: (crop.y / baseDimensions.height) * 100,
+      width: (crop.width / baseDimensions.width) * 100,
+      height: (crop.height / baseDimensions.height) * 100,
+      aspect: crop.width / crop.height
+    };
+  }
+
+  static getPosition(element) {
+    const rect = element.getBoundingClientRect();
+    return {
+      x: rect.left,
+      y: rect.top,
+      width: rect.width,
+      height: rect.height
+    };
+  }
+
+  static imageHost = 'https://proxy.topixcdn.com/ipicimg/';
+  static defaultValues = {brt: 100, sat: 100, con: 0};
+  static defaultGravity = {x: 0, y: 0, scale: 1};
+  static defaultCrop = {x: 10, y: 10, width: 80, height: 80, aspect: 4/2};
+
   constructor(props) {
     super(props);
     this.state = {
-      values: DEFAULT_VALUES,
-      gravity: DEFAULT_GRAVITY,
-      crop: DEFAULT_CROP,
-      editSpec: this.parseEditSpec(this.props.editSpec) || DEFAULT_EDIT_SPEC,
+      values: ImageTools.defaultValues,
+      gravity: ImageTools.defaultGravity,
+      crop: ImageTools.defaultCrop,
+      editSpec: this.parseEditSpec(this.props.editSpec),
       id: this.props.id,
       displayCrops: null
     };
-    this.baseResetCrop = DEFAULT_CROP;
-    this.aspectLock = this.props.aspectLock || DEFAULT_ASPECT_LOCK;
+    this.baseResetCrop = ImageTools.defaultCrop;
+    this.aspectLock = this.props.aspectLock;
     this.cropTool = this.props.partnerCrops ? this.props.partnerCrops : false;
     this.imageLoaded = new Promise((resolve, reject) => {
       this.imageLoadedResolve = resolve;
       this.imageLoadedReject = reject;
     });
     this.editSpecPattern();
-  }
-
-  render() {
-    return (
-      <div className="image-tools">
-        <div className="menu">
-          <div className="content-wrap">
-            {this.valuesDisplay()}
-            <form onChange={this.updateValues}>
-              <div>
-                <label>Brightness {this.state.values.brt}%</label>
-                <input type="range" data-type="brt" key={this.state.values.brt} defaultValue={this.state.values.brt} min="100" max="300"></input>
-              </div>
-              <div>
-                <label>Saturation {this.state.values.sat}%</label>
-                <input type="range" data-type="sat" key={this.state.values.sat} defaultValue={this.state.values.sat} min="100" max="300"></input>
-              </div>
-              <div>
-                <label>Contrast {this.state.values.con}%</label>
-                <input type="range" data-type="con" key={this.state.values.con} defaultValue={this.state.values.con} min="0" max="50"></input>
-              </div>
-            </form>
-            {this.scaleDisplay()}
-            <button onClick={this.reset}>Reset</button>
-            <button onClick={this.done}>Done</button>
-          </div>
-        </div>
-        {this.imageDisplay()}
-        {this.cropDisplay()}
-      </div>
-    );
   }
 
   cropDisplay() {
@@ -105,15 +115,15 @@ export default class ImageTools extends React.Component {
       };
       return (
         <div className="master-crop">
-          <img className="image" ref={this.setImagePosition} src={`${IMAGE_HOST}${this.state.id}`} onClick={this.updateGravityPosition} alt="preview" />
+          <img className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.state.id}`} onClick={this.updateGravityPosition} alt="preview" />
           <span className="indicator" ref={this.setIndicatorPosition} onClick={this.updateGravityPosition} style={indicatorStyle}>X</span>
         </div>
       );
     } else {
       return (
-        <ReactCrop
+        <Crop
           className="preview-image" onImageLoaded={this.onImageLoaded}
-          src={`${IMAGE_HOST}${this.state.id}-${this.state.editSpec}`}
+          src={`${ImageTools.imageHost}${this.state.id}-${this.state.editSpec}`}
           crop={this.state.crop} onChange={this.cropUpdate}
         />
       );
@@ -133,7 +143,6 @@ export default class ImageTools extends React.Component {
         cHeight = resizeHeight;
         cWidth = Math.round(crop.aspect * cHeight);
 
-        // oversize
         let oversizeScale = cWidth / resizeWidth;
         if (oversizeScale > 1) {
           cHeight = resizeHeight / oversizeScale;
@@ -143,7 +152,6 @@ export default class ImageTools extends React.Component {
         cWidth = resizeWidth;
         cHeight = Math.round(cWidth / crop.aspect);
 
-        // oversize
         let oversizeScale = cHeight / resizeHeight;
         if (oversizeScale > 1) {
           cWidth = resizeWidth / oversizeScale;
@@ -200,7 +208,7 @@ export default class ImageTools extends React.Component {
   }
 
   generateDisplayCrops(specs) {
-    this.setState({displayCrops: specs.map(spec => `${IMAGE_HOST}${this.state.id}-${spec}`)});
+    this.setState({displayCrops: specs.map(spec => `${ImageTools.imageHost}${this.state.id}-${spec}`)});
   }
 
   setImagePosition = (event) => {
@@ -245,46 +253,6 @@ export default class ImageTools extends React.Component {
     this.setState({gravity: gravityObj});
     this.calculateCropValues();
   };
-
-  static convertCropScale(crop, baseDimensions, newDimensions) {
-    return {
-      x: Math.round((crop.x / baseDimensions.width) * newDimensions.width),
-      y: Math.round((crop.y / baseDimensions.height) * newDimensions.height),
-      width: Math.round((crop.width / baseDimensions.width) * newDimensions.width),
-      height: Math.round((crop.height / baseDimensions.height) * newDimensions.height),
-      aspect: crop.width / crop.height
-    };
-  }
-
-  static convertPercentToPixel(crop, baseDimensions) {
-    return {
-      x: (crop.x / 100) * baseDimensions.width,
-      y: (crop.y / 100) * baseDimensions.height,
-      width: (crop.width / 100) * baseDimensions.width,
-      height: (crop.height / 100) * baseDimensions.height,
-      aspect: crop.width / crop.height
-    };
-  }
-
-  static convertPixelToPercent(crop, baseDimensions) {
-    return {
-      x: (crop.x / baseDimensions.width) * 100,
-      y: (crop.y / baseDimensions.height) * 100,
-      width: (crop.width / baseDimensions.width) * 100,
-      height: (crop.height / baseDimensions.height) * 100,
-      aspect: crop.width / crop.height
-    };
-  }
-
-  static getPosition(element) {
-    const rect = element.getBoundingClientRect();
-    return {
-      x: rect.left,
-      y: rect.top,
-      width: rect.width,
-      height: rect.height
-    };
-  }
 
   async editSpecPattern () {
     try {
@@ -369,7 +337,7 @@ export default class ImageTools extends React.Component {
   };
 
   done = (event) => {
-    this.props.cb(this.createFinalEditSpec());
+    this.props.cb(this.cropTool ? this.finalCrops : this.createFinalEditSpec());
   };
 
   createFinalEditSpec() {
@@ -394,15 +362,35 @@ export default class ImageTools extends React.Component {
     values[type] = value;
     this.updateEditSpec(values);
   };
-}
 
-ImageTools.propTypes = {
-  id: PropTypes.string.isRequired,
-  cb: PropTypes.func.isRequired,
-  aspectLock: PropTypes.bool,
-  editSpec: PropTypes.string,
-  partnerCrops: PropTypes.arrayOf(PropTypes.shape({
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired
-  }))
-};
+  render() {
+    return (
+      <div className="image-tools">
+        <div className="menu">
+          <div className="content-wrap">
+            {this.valuesDisplay()}
+            <form onChange={this.updateValues}>
+              <div>
+                <label>Brightness {this.state.values.brt}%</label>
+                <input type="range" data-type="brt" key={this.state.values.brt} defaultValue={this.state.values.brt} min="100" max="300"></input>
+              </div>
+              <div>
+                <label>Saturation {this.state.values.sat}%</label>
+                <input type="range" data-type="sat" key={this.state.values.sat} defaultValue={this.state.values.sat} min="100" max="300"></input>
+              </div>
+              <div>
+                <label>Contrast {this.state.values.con}%</label>
+                <input type="range" data-type="con" key={this.state.values.con} defaultValue={this.state.values.con} min="0" max="50"></input>
+              </div>
+            </form>
+            {this.scaleDisplay()}
+            <button onClick={this.reset}>Reset</button>
+            <button onClick={this.done}>Done</button>
+          </div>
+        </div>
+        {this.imageDisplay()}
+        {this.cropDisplay()}
+      </div>
+    );
+  }
+}
