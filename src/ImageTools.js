@@ -7,7 +7,6 @@ import ReactCrop from './ReactCrop';
   TODO:
     - add option to lock or unlock aspect ratio
     - change state values from prop edit spec
-    - add crop-tool functionality if array of partnercrops is passed
     - take values from edit spec when in crop-tool mode
     - allow adjustments to automatic crop by clicking on display crop (preview)
 */
@@ -114,19 +113,31 @@ export default class ImageTools extends React.Component {
       };
       return (
         <div className="master-crop">
-          <img className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.state.id}`} onClick={this.updateGravityPosition} alt="preview" />
-          <span className="indicator" ref={this.setIndicatorPosition} onClick={this.updateGravityPosition} style={indicatorStyle}>X</span>
+          <img
+            className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.state.id}`}
+            onClick={this.updateGravityPosition} style={this.generateImageStyle()} alt="preview"
+          />
+          <span
+            className="indicator" ref={this.setIndicatorPosition}
+            onClick={this.updateGravityPosition} style={indicatorStyle}>X
+          </span>
         </div>
       );
     } else {
       return (
         <ReactCrop
           className="preview-image" onImageLoaded={this.onImageLoaded}
-          src={`${ImageTools.imageHost}${this.state.id}-${this.state.editSpec}`}
-          crop={this.state.crop} onChange={this.cropUpdate} style={{filter: 'brightness(100%)'}}
+          src={`${ImageTools.imageHost}${this.state.id}`}
+          crop={this.state.crop} onChange={this.cropUpdate} style={this.generateImageStyle()}
         />
       );
     }
+  }
+
+  generateImageStyle() {
+    return {
+      filter: `brightness(${this.state.values.brt}%) saturate(${this.state.values.sat}%) contrast(${100 + parseInt(this.state.values.con, 10)}%)`
+    };
   }
 
   calculateCropValues() {

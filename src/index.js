@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-// import ImageEditor from './ImageEditor';
 import ImageTools from './ImageTools';
 import './index.css';
 
