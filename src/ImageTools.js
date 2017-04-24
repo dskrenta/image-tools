@@ -7,7 +7,6 @@ import ReactCrop from './ReactCrop';
   TODO:
     - add option to lock or unlock aspect ratio
     - change state values from prop edit spec
-    - add crop-tool functionality if array of partnercrops is passed
     - take values from edit spec when in crop-tool mode
     - allow adjustments to automatic crop by clicking on display crop (preview)
 */
@@ -99,7 +98,7 @@ export default class ImageTools extends React.Component {
       return (
         <div className="display-crop-container">
           {this.state.displayCrops.map((imageUrl, index) => {
-            return <img className="display-crop" key={index} src={imageUrl} alt="display-crop" />;
+            return <img className="display-crop" key={index} src={imageUrl} style={this.generateImageStyle()} alt="display-crop" />;
           })}
         </div>
       );
@@ -114,19 +113,31 @@ export default class ImageTools extends React.Component {
       };
       return (
         <div className="master-crop">
-          <img className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.state.id}`} onClick={this.updateGravityPosition} alt="preview" />
-          <span className="indicator" ref={this.setIndicatorPosition} onClick={this.updateGravityPosition} style={indicatorStyle}>X</span>
+          <img
+            className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.state.id}`}
+            onClick={this.updateGravityPosition} style={this.generateImageStyle()} alt="preview"
+          />
+          <span
+            className="indicator" ref={this.setIndicatorPosition}
+            onClick={this.updateGravityPosition} style={indicatorStyle}>X
+          </span>
         </div>
       );
     } else {
       return (
         <ReactCrop
           className="preview-image" onImageLoaded={this.onImageLoaded}
-          src={`${ImageTools.imageHost}${this.state.id}-${this.state.editSpec}`}
-          crop={this.state.crop} onChange={this.cropUpdate} style={{filter: 'brightness(100%)'}}
+          src={`${ImageTools.imageHost}${this.state.id}`}
+          crop={this.state.crop} onChange={this.cropUpdate} style={this.generateImageStyle()}
         />
       );
     }
+  }
+
+  generateImageStyle() {
+    return {
+      filter: `brightness(${this.state.values.brt}%) saturate(${this.state.values.sat}%) contrast(${100 + parseInt(this.state.values.con, 10)}%)`
+    };
   }
 
   calculateCropValues() {
@@ -368,20 +379,14 @@ export default class ImageTools extends React.Component {
         <div className="menu">
           <div className="content-wrap">
             {this.valuesDisplay()}
-            <form onChange={this.updateValues}>
-              <div>
-                <label>Brightness {this.state.values.brt}%</label>
-                <input type="range" data-type="brt" key={this.state.values.brt} defaultValue={this.state.values.brt} min="100" max="300"></input>
-              </div>
-              <div>
-                <label>Saturation {this.state.values.sat}%</label>
-                <input type="range" data-type="sat" key={this.state.values.sat} defaultValue={this.state.values.sat} min="100" max="300"></input>
-              </div>
-              <div>
-                <label>Contrast {this.state.values.con}%</label>
-                <input type="range" data-type="con" key={this.state.values.con} defaultValue={this.state.values.con} min="0" max="50"></input>
-              </div>
-            </form>
+            <div>
+              <label>Brightness {this.state.values.brt}%</label>
+              <input type="range" data-type="brt" onChange={this.updateValues} value={this.state.values.brt} min="100" max="300"></input>
+              <label>Saturation {this.state.values.sat}%</label>
+              <input type="range" data-type="sat" onChange={this.updateValues} value={this.state.values.sat} min="100" max="300"></input>
+              <label>Contrast {this.state.values.con}%</label>
+              <input type="range" data-type="con" onChange={this.updateValues} value={this.state.values.con} min="0" max="50"></input>
+            </div>
             {this.scaleDisplay()}
             <button onClick={this.reset}>Reset</button>
             <button onClick={this.done}>Done</button>

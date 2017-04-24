@@ -20,6 +20,7 @@
   position: relative;
   height: 300px;
   padding-bottom: 5px;
+  width: calc(100vw - 170px);
 }
 
 .image {
