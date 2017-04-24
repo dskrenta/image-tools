@@ -1,8 +1,7 @@
 import React from 'react';
-// import ReactCrop from 'react-image-crop';
 import PropTypes from 'prop-types';
-import Crop from './Crop';
-import './ImageEditor.css';
+import './ImageTools.css';
+import ReactCrop from './ReactCrop';
 
 /*
   TODO:
@@ -121,10 +120,10 @@ export default class ImageTools extends React.Component {
       );
     } else {
       return (
-        <Crop
+        <ReactCrop
           className="preview-image" onImageLoaded={this.onImageLoaded}
           src={`${ImageTools.imageHost}${this.state.id}-${this.state.editSpec}`}
-          crop={this.state.crop} onChange={this.cropUpdate}
+          crop={this.state.crop} onChange={this.cropUpdate} style={{filter: 'brightness(100%)'}}
         />
       );
     }

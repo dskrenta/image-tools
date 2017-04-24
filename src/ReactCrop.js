@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import './Crop.css';
 
 const EMPTY_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
@@ -82,7 +81,7 @@ function ensureAspectDimensions(cropObj, imageEl) {
   return crop;
 }
 
-export default class Crop extends React.Component {
+class ReactCrop extends Component {
 
   static propTypes = {
     src: PropTypes.string.isRequired,
@@ -110,6 +109,7 @@ export default class Crop extends React.Component {
       PropTypes.arrayOf(PropTypes.node),
       PropTypes.node,
     ]),
+    style: PropTypes.object
   }
 
   static defaultProps = {
@@ -364,17 +364,17 @@ export default class Crop extends React.Component {
       return;
     }
 
-    if (keyCode === Crop.arrowKey.left) {
-      crop.x -= Crop.nudgeStep;
+    if (keyCode === ReactCrop.arrowKey.left) {
+      crop.x -= ReactCrop.nudgeStep;
       nudged = true;
-    } else if (keyCode === Crop.arrowKey.right) {
-      crop.x += Crop.nudgeStep;
+    } else if (keyCode === ReactCrop.arrowKey.right) {
+      crop.x += ReactCrop.nudgeStep;
       nudged = true;
-    } else if (keyCode === Crop.arrowKey.up) {
-      crop.y -= Crop.nudgeStep;
+    } else if (keyCode === ReactCrop.arrowKey.up) {
+      crop.y -= ReactCrop.nudgeStep;
       nudged = true;
-    } else if (keyCode === Crop.arrowKey.down) {
-      crop.y += Crop.nudgeStep;
+    } else if (keyCode === ReactCrop.arrowKey.down) {
+      crop.y += ReactCrop.nudgeStep;
       nudged = true;
     }
 
@@ -545,16 +545,16 @@ export default class Crop extends React.Component {
     }
 
     // Apply x/y/width/height changes depending on ordinate (fixed aspect always applies both).
-    if (crop.aspect || Crop.xyOrds.indexOf(ord) > -1) {
+    if (crop.aspect || ReactCrop.xyOrds.indexOf(ord) > -1) {
       crop.x = clamp(newX, 0, 100 - newSize.width);
       crop.y = clamp(newY, 0, 100 - newSize.height);
 
       crop.width = newSize.width;
       crop.height = newSize.height;
-    } else if (Crop.xOrds.indexOf(ord) > -1) {
+    } else if (ReactCrop.xOrds.indexOf(ord) > -1) {
       crop.x = clamp(newX, 0, 100 - newSize.width);
       crop.width = newSize.width;
-    } else if (Crop.yOrds.indexOf(ord) > -1) {
+    } else if (ReactCrop.yOrds.indexOf(ord) > -1) {
       crop.y = clamp(newY, 0, 100 - newSize.height);
       crop.height = newSize.height;
     }
@@ -590,30 +590,30 @@ export default class Crop extends React.Component {
       <div
         ref={n => (this.cropSelectRef = n)}
         style={style}
-        className="Crop__crop-selection"
+        className="ReactCrop__crop-selection"
         onMouseDown={this.onCropMouseTouchDown}
         onTouchStart={this.onCropMouseTouchDown}
       >
 
-        <div className="Crop__drag-bar ord-n" data-ord="n" />
-        <div className="Crop__drag-bar ord-e" data-ord="e" />
-        <div className="Crop__drag-bar ord-s" data-ord="s" />
-        <div className="Crop__drag-bar ord-w" data-ord="w" />
+        <div className="ReactCrop__drag-bar ord-n" data-ord="n" />
+        <div className="ReactCrop__drag-bar ord-e" data-ord="e" />
+        <div className="ReactCrop__drag-bar ord-s" data-ord="s" />
+        <div className="ReactCrop__drag-bar ord-w" data-ord="w" />
 
-        <div className="Crop__drag-handle ord-nw" data-ord="nw" />
-        <div className="Crop__drag-handle ord-n" data-ord="n" />
-        <div className="Crop__drag-handle ord-ne" data-ord="ne" />
-        <div className="Crop__drag-handle ord-e" data-ord="e" />
-        <div className="Crop__drag-handle ord-se" data-ord="se" />
-        <div className="Crop__drag-handle ord-s" data-ord="s" />
-        <div className="Crop__drag-handle ord-sw" data-ord="sw" />
-        <div className="Crop__drag-handle ord-w" data-ord="w" />
+        <div className="ReactCrop__drag-handle ord-nw" data-ord="nw" />
+        <div className="ReactCrop__drag-handle ord-n" data-ord="n" />
+        <div className="ReactCrop__drag-handle ord-ne" data-ord="ne" />
+        <div className="ReactCrop__drag-handle ord-e" data-ord="e" />
+        <div className="ReactCrop__drag-handle ord-se" data-ord="se" />
+        <div className="ReactCrop__drag-handle ord-s" data-ord="s" />
+        <div className="ReactCrop__drag-handle ord-sw" data-ord="sw" />
+        <div className="ReactCrop__drag-handle ord-w" data-ord="w" />
       </div>
     );
   }
 
   nextCropState(crop) {
-    const nextCrop = { ...Crop.defaultCrop, ...crop };
+    const nextCrop = { ...ReactCrop.defaultCrop, ...crop };
     this.cropInvalid = isCropInvalid(nextCrop);
     return nextCrop;
   }
@@ -645,16 +645,16 @@ export default class Crop extends React.Component {
       cropSelection = this.createCropSelection();
     }
 
-    const componentClasses = ['Crop'];
+    const componentClasses = ['ReactCrop'];
 
     if (this.state.newCropIsBeingDrawn) {
-      componentClasses.push('Crop--new-crop');
+      componentClasses.push('ReactCrop--new-crop');
     }
     if (this.state.crop.aspect) {
-      componentClasses.push('Crop--fixed-aspect');
+      componentClasses.push('ReactCrop--fixed-aspect');
     }
     if (this.props.disabled) {
-      componentClasses.push('Crop--disabled');
+      componentClasses.push('ReactCrop--disabled');
     }
 
     return (
@@ -669,22 +669,24 @@ export default class Crop extends React.Component {
         <img
           ref={n => (this.imageRef = n)}
           crossOrigin={this.props.crossorigin}
-          className="Crop__image"
+          className="ReactCrop__image"
           src={this.props.src}
           onLoad={e => this.onImageLoad(e.target)}
           alt={this.props.imageAlt}
+          style={this.props.style}
         />
 
         <div
-          className="Crop__crop-wrapper"
+          className="ReactCrop__crop-wrapper"
           ref={n => (this.cropWrapperRef = n)}
         >
           <img
             ref={n => (this.imageCopyRef = n)}
             crossOrigin={this.props.crossorigin}
-            className="Crop__image-copy"
+            className="ReactCrop__image-copy"
             src={this.props.src}
             alt={this.props.imageAlt}
+            style={this.props.style}
           />
           {cropSelection}
         </div>
@@ -694,3 +696,5 @@ export default class Crop extends React.Component {
     );
   }
 }
+
+module.exports = ReactCrop;
