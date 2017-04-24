@@ -5,7 +5,6 @@ import ReactCrop from './ReactCrop';
 
 /*
   TODO:
-    - add option to lock or unlock aspect ratio
     - change state values from prop edit spec
     - take values from edit spec when in crop-tool mode
     - allow adjustments to automatic crop by clicking on display crop (preview)
@@ -27,36 +26,6 @@ export default class ImageTools extends React.Component {
     aspectLock: false,
     editSpec: 'brt100-sat100-con0x100'
   };
-
-  static convertCropScale(crop, baseDimensions, newDimensions) {
-    return {
-      x: Math.round((crop.x / baseDimensions.width) * newDimensions.width),
-      y: Math.round((crop.y / baseDimensions.height) * newDimensions.height),
-      width: Math.round((crop.width / baseDimensions.width) * newDimensions.width),
-      height: Math.round((crop.height / baseDimensions.height) * newDimensions.height),
-      aspect: crop.width / crop.height
-    };
-  }
-
-  static convertPercentToPixel(crop, baseDimensions) {
-    return {
-      x: (crop.x / 100) * baseDimensions.width,
-      y: (crop.y / 100) * baseDimensions.height,
-      width: (crop.width / 100) * baseDimensions.width,
-      height: (crop.height / 100) * baseDimensions.height,
-      aspect: crop.width / crop.height
-    };
-  }
-
-  static convertPixelToPercent(crop, baseDimensions) {
-    return {
-      x: (crop.x / baseDimensions.width) * 100,
-      y: (crop.y / baseDimensions.height) * 100,
-      width: (crop.width / baseDimensions.width) * 100,
-      height: (crop.height / baseDimensions.height) * 100,
-      aspect: crop.width / crop.height
-    };
-  }
 
   static getPosition(element) {
     const rect = element.getBoundingClientRect();
@@ -88,10 +57,9 @@ export default class ImageTools extends React.Component {
       crop: ImageTools.defaultCrop,
       editSpec: this.parseEditSpec(this.props.editSpec),
       id: this.props.id,
-      displayCrops: null
+      displayCrops: undefined
     };
     this.baseResetCrop = ImageTools.defaultCrop;
-    this.aspectLock = this.props.aspectLock;
     this.cropTool = this.props.partnerCrops ? this.props.partnerCrops : false;
     this.imageLoaded = new Promise((resolve, reject) => {
       this.imageLoadedResolve = resolve;
@@ -144,6 +112,36 @@ export default class ImageTools extends React.Component {
   generateImageStyle() {
     return {
       filter: `brightness(${this.state.values.brt}%) saturate(${this.state.values.sat}%) contrast(${100 + parseInt(this.state.values.con, 10)}%)`
+    };
+  }
+
+  convertCropScale(crop, baseDimensions, newDimensions) {
+    return {
+      x: Math.round((crop.x / baseDimensions.width) * newDimensions.width),
+      y: Math.round((crop.y / baseDimensions.height) * newDimensions.height),
+      width: Math.round((crop.width / baseDimensions.width) * newDimensions.width),
+      height: Math.round((crop.height / baseDimensions.height) * newDimensions.height),
+      aspect: this.props.aspectLock ? (crop.width / crop.height) : undefined
+    };
+  }
+
+  convertPercentToPixel(crop, baseDimensions) {
+    return {
+      x: (crop.x / 100) * baseDimensions.width,
+      y: (crop.y / 100) * baseDimensions.height,
+      width: (crop.width / 100) * baseDimensions.width,
+      height: (crop.height / 100) * baseDimensions.height,
+      aspect: this.props.aspectLock ? (crop.width / crop.height) : undefined
+    };
+  }
+
+  convertPixelToPercent(crop, baseDimensions) {
+    return {
+      x: (crop.x / baseDimensions.width) * 100,
+      y: (crop.y / baseDimensions.height) * 100,
+      width: (crop.width / baseDimensions.width) * 100,
+      height: (crop.height / baseDimensions.height) * 100,
+      aspect: this.props.aspectLock ? (crop.width / crop.height) : undefined
     };
   }
 
@@ -200,7 +198,7 @@ export default class ImageTools extends React.Component {
       cWidth += cX;
       cHeight += cY;
 
-      const scaled = ImageTools.convertCropScale(
+      const scaled = this.convertCropScale(
         {
           x: cX,
           y: cY,
@@ -221,7 +219,6 @@ export default class ImageTools extends React.Component {
       return cropSpec;
     });
     this.generateDisplayCrops(this.finalCrops);
-    console.log(this.finalCrops);
   }
 
   generateDisplayCrops(specs) {
@@ -269,8 +266,8 @@ export default class ImageTools extends React.Component {
       if (this.cropValuesSpec) {
         await this.imageLoaded;
         let propCropObj = this.parseCrop(this.cropValuesSpec);
-        const convertedCrop = ImageTools.convertCropScale(propCropObj, this.imageDimensions.natural, this.imageDimensions.display);
-        const convertedCropValues = ImageTools.convertPixelToPercent(convertedCrop, this.imageDimensions.display);
+        const convertedCrop = this.convertCropScale(propCropObj, this.imageDimensions.natural, this.imageDimensions.display);
+        const convertedCropValues = this.convertPixelToPercent(convertedCrop, this.imageDimensions.display);
         this.baseResetCrop = convertedCropValues;
         this.setState({crop: convertedCropValues});
       }
@@ -280,7 +277,7 @@ export default class ImageTools extends React.Component {
   }
 
   parseEditSpec(editSpec) {
-    let cpIndex = null;
+    let cpIndex = undefined;
     const specs = editSpec.split('-');
     const returnSpec = specs.filter(spec => {
       if (spec.startsWith('cp')) {
@@ -296,12 +293,14 @@ export default class ImageTools extends React.Component {
 
   parseCrop(cropSpec) {
     let values = Array.from(cropSpec).slice(2).join('').split('x');
-    return {
+    const cropObj = {
       x: values[0],
       y: values[1],
       width: values[2] - values[0],
-      height: values[3] - values[1]
+      height: values[3] - values[1],
     };
+    cropObj.aspect = this.props.aspectLock ? (cropObj.width / cropObj.height) : undefined;
+    return cropObj;
   }
 
   onImageLoaded = (crop, image, pixelCrop) => {
@@ -335,7 +334,7 @@ export default class ImageTools extends React.Component {
         y: pixelCrop.y,
         width: pixelCrop.width,
         height: pixelCrop.height,
-        aspect: crop.aspect
+        aspect: this.props.aspectLock ? crop.aspect : undefined
       }
     });
     this.setState({crop: crop});
@@ -353,8 +352,8 @@ export default class ImageTools extends React.Component {
   createFinalEditSpec() {
     let cropParam = '';
     if (this.imageDimensions && this.state.crop) {
-      const convertedCropValues = ImageTools.convertPercentToPixel(this.state.crop, this.imageDimensions.display);
-      const naturalCrop = ImageTools.convertCropScale(convertedCropValues, this.imageDimensions.display, this.imageDimensions.natural);
+      const convertedCropValues = this.convertPercentToPixel(this.state.crop, this.imageDimensions.display);
+      const naturalCrop = this.convertCropScale(convertedCropValues, this.imageDimensions.display, this.imageDimensions.natural);
       cropParam = `-cp${naturalCrop.x}x${naturalCrop.y}x${naturalCrop.width + naturalCrop.x}x${naturalCrop.height + naturalCrop.y}`;
     }
     return `brt${this.state.values.brt}-sat${this.state.values.sat}-con${this.state.values.con}x${100 - this.state.values.con}${cropParam}`;
