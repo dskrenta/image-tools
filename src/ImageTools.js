@@ -68,6 +68,13 @@ export default class ImageTools extends React.Component {
     };
   }
 
+  static createReference(element) {
+    return {
+      element: element,
+      position: ImageTools.getPosition(element)
+    };
+  }
+
   static imageHost = 'https://proxy.topixcdn.com/ipicimg/';
   static defaultValues = {brt: 100, sat: 100, con: 0};
   static defaultGravity = {x: 0, y: 0, scale: 1};
@@ -228,13 +235,6 @@ export default class ImageTools extends React.Component {
   setIndicatorPosition = (event) => {
     this.previewIndicator = ImageTools.createReference(event);
   };
-
-  static createReference(element) {
-    return {
-      element: element,
-      position: ImageTools.getPosition(element)
-    };
-  }
 
   scaleDisplay() {
     if (this.cropTool) {
