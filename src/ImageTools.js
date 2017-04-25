@@ -5,7 +5,11 @@ import ReactCrop from './ReactCrop';
 
 /*
   TODO:
-    - allow adjustments to automatic crop by clicking on display crop (preview)
+    - Ability to change sub crops manually
+    DONE - Change default reset values when values passed through props
+    - Fix contrast scale issue between css filter and image magick
+    DONE - Add reset scale property for crop-tool version & (x, y) positions
+    - Add in tool toggle between crop-tool and image-editor
 */
 
 export default class ImageTools extends React.Component {
@@ -59,6 +63,7 @@ export default class ImageTools extends React.Component {
     };
     this.baseResetCrop = ImageTools.defaultCrop;
     this.cropTool = this.props.partnerCrops ? this.props.partnerCrops : false;
+    this.resetValues = ImageTools.defaultValues;
     this.imageLoaded = new Promise((resolve, reject) => {
       this.imageLoadedResolve = resolve;
       this.imageLoadedReject = reject;
@@ -71,6 +76,19 @@ export default class ImageTools extends React.Component {
       this.setState({values: this.passedValues});
     }
   }
+
+  toggleButtonDisplay() {
+    if (this.cropTool) {
+      return <button onClick={this.toggleButtonOnclick}>Image Edit</button>;
+    } else if (this.props.partnerCrops) {
+      return <button onClick={this.toggleButtonOnclick}>Crop Tool</button>;
+    }
+  }
+
+  toggleButtonOnclick = (event) => {
+    this.cropTool = !this.cropTool;
+    this.setState(this.state);
+  };
 
   cropDisplay() {
     if (this.state.displayCrops && this.cropTool) {
@@ -298,6 +316,7 @@ export default class ImageTools extends React.Component {
         return true;
       }
     }).join('-');
+    this.resetValues = this.passedValues;
     this.cropValuesSpec = specs[cpIndex];
     return returnSpec;
   }
@@ -352,7 +371,7 @@ export default class ImageTools extends React.Component {
   };
 
   reset = (event) => {
-    this.setState({crop: this.baseResetCrop});
+    this.setState({crop: this.baseResetCrop, gravity: ImageTools.defaultGravity});
     this.updateEditSpec();
   };
 
@@ -370,7 +389,8 @@ export default class ImageTools extends React.Component {
     return `brt${this.state.values.brt}-sat${this.state.values.sat}-con${this.state.values.con}x${100 - this.state.values.con}${cropParam}`;
   }
 
-  updateEditSpec = (values = {brt: 100, sat: 100, con: 0}) => {
+  updateEditSpec = (values) => {
+    const updateValues = values ? values : this.resetValues;
     const editSpec = `brt${values.brt}-sat${values.sat}-con${values.con}x${100 - values.con}`;
     this.setState({values: values, editSpec: editSpec});
   };
@@ -388,6 +408,7 @@ export default class ImageTools extends React.Component {
       <div className="image-tools">
         <div className="menu">
           <div className="content-wrap">
+
             {this.valuesDisplay()}
             <div>
               <label>Brightness {this.state.values.brt}%</label>
@@ -400,6 +421,7 @@ export default class ImageTools extends React.Component {
             {this.scaleDisplay()}
             <button onClick={this.reset}>Reset</button>
             <button onClick={this.done}>Done</button>
+            {this.toggleButtonDisplay()}
           </div>
         </div>
         {this.imageDisplay()}
