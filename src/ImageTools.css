@@ -1,8 +1,17 @@
 @import './ReactCrop.css';
 
+.image-tools {
+  height: 300px;
+  background: #333;
+}
+
+.test-margin {
+  margin: 100px;
+}
+
 .menu {
   width: 170px;
-  height: 100vh;
+  height: 100%;
   float: right;
   vertical-align: middle;
   text-align: right;
@@ -24,14 +33,13 @@
 }
 
 .image {
-  position: absolute;
   height: 300px;
 }
 
 .indicator {
   top: 90px;
   left: 90px;
-  position: relative;
+  position: absolute;
   width: 10px;
   height: 10px;
   background-color: red;
