@@ -51,6 +51,7 @@ export default class ImageTools extends React.Component {
   static imageHost = 'https://proxy.topixcdn.com/ipicimg/';
   static defaultValues = {brt: 100, sat: 100, con: 0};
   static defaultGravity = {x: 0, y: 0, scale: 1};
+  static defaultGravityStyle = {x: 100, y: 100};
   static defaultCrop = {x: 10, y: 10, width: 80, height: 80, aspect: 4/2};
 
   constructor(props) {
@@ -61,10 +62,12 @@ export default class ImageTools extends React.Component {
       crop: ImageTools.defaultCrop,
       editSpec: this.parseEditSpec(this.props.editSpec),
       id: this.props.id,
-      displayCrops: undefined
+      displayCrops: undefined,
+      gravityStyle: ImageTools.defaultGravityStyle
     };
     this.baseResetCrop = ImageTools.defaultCrop;
     this.cropTool = this.props.partnerCrops ? this.props.partnerCrops : false;
+    // this.resetValues = ImageTools.defaultValues;
     this.imageLoaded = new Promise((resolve, reject) => {
       this.imageLoadedResolve = resolve;
       this.imageLoadedReject = reject;
@@ -74,9 +77,23 @@ export default class ImageTools extends React.Component {
 
   componentDidMount() {
     if (this.passedValues) {
-      this.setState({values: this.passedValues});
+      this.resetValues = this.passedValues;
+      this.setState({values: this.resetValues});
     }
   }
+
+  toggleButtonDisplay() {
+    if (this.cropTool) {
+      return <button onClick={this.toggleButtonOnclick}>Image Edit</button>;
+    } else if (this.props.partnerCrops) {
+      return <button onClick={this.toggleButtonOnclick}>Crop Tool</button>;
+    }
+  }
+
+  toggleButtonOnclick = (event) => {
+    this.cropTool = !this.cropTool;
+    this.setState(this.state);
+  };
 
   cropDisplay() {
     if (this.state.displayCrops && this.cropTool) {
@@ -93,8 +110,8 @@ export default class ImageTools extends React.Component {
   imageDisplay() {
     if (this.cropTool) {
       const indicatorStyle = {
-        left: this.state.gravity.x,
-        top: this.state.gravity.y
+        left: this.state.gravityStyle.x,
+        top: this.state.gravityStyle.y
       };
       return (
         <div className="master-crop">
@@ -156,7 +173,7 @@ export default class ImageTools extends React.Component {
   }
 
   calculateCropValues() {
-    this.finalCrops = this.cropTool.map(crop => {
+    this.finalCrops = this.props.partnerCrops.map(crop => {
       crop.aspect = crop.width / crop.height;
       let cWidth = 0;
       let cHeight = 0;
@@ -243,6 +260,10 @@ export default class ImageTools extends React.Component {
     this.previewIndicator = ImageTools.createReference(event);
   };
 
+  setContainerPosition = (event) => {
+    this.containerPosition = ImageTools.createReference(event);
+  };
+
   scaleDisplay() {
     if (this.cropTool) {
       return (
@@ -267,7 +288,13 @@ export default class ImageTools extends React.Component {
     const gravityObj = this.state.gravity;
     gravityObj.x = event.clientX;
     gravityObj.y = event.clientY;
-    this.setState({gravity: gravityObj});
+    this.setState({
+      gravity: gravityObj,
+      gravityStyle: {
+        x: event.clientX - this.containerPosition.position.x,
+        y: event.clientY - this.containerPosition.position.y
+      }
+    });
     this.calculateCropValues();
   };
 
@@ -300,7 +327,7 @@ export default class ImageTools extends React.Component {
         if (valueObj.key === 'con') {
           valueObj.value = valueObj.value.split('x').slice(0, 1).toString();
         }
-        this.passedValues[valueObj.key] = valueObj.value;
+        this.passedValues[valueObj.key] = parseInt(valueObj.value, 10);
         return true;
       }
     }).join('-');
@@ -358,8 +385,9 @@ export default class ImageTools extends React.Component {
   };
 
   reset = (event) => {
-    this.setState({crop: this.baseResetCrop});
-    this.updateEditSpec();
+    console.log(this.resetValues);
+    this.setState({crop: this.baseResetCrop, gravity: ImageTools.defaultGravity, values: this.resetValues});
+    this.updateEditSpec(this.resetValues);
   };
 
   done = (event) => {
@@ -376,7 +404,7 @@ export default class ImageTools extends React.Component {
     return `brt${this.state.values.brt}-sat${this.state.values.sat}-con${this.state.values.con}x${100 - this.state.values.con}${cropParam}`;
   }
 
-  updateEditSpec = (values = {brt: 100, sat: 100, con: 0}) => {
+  updateEditSpec = (values = ImageTools.defaultValues) => {
     const editSpec = `brt${values.brt}-sat${values.sat}-con${values.con}x${100 - values.con}`;
     this.setState({values: values, editSpec: editSpec});
   };
@@ -391,25 +419,29 @@ export default class ImageTools extends React.Component {
 
   render() {
     return (
-      <div className="image-tools">
-        <div className="menu">
-          <div className="content-wrap">
-            {this.valuesDisplay()}
-            <div>
-              <label>Brightness {this.state.values.brt}%</label>
-              <input type="range" data-type="brt" onChange={this.updateValues} value={this.state.values.brt} min="100" max="300"></input>
-              <label>Saturation {this.state.values.sat}%</label>
-              <input type="range" data-type="sat" onChange={this.updateValues} value={this.state.values.sat} min="100" max="300"></input>
-              <label>Contrast {this.state.values.con}%</label>
-              <input type="range" data-type="con" onChange={this.updateValues} value={this.state.values.con} min="0" max="50"></input>
+      <div className = "test-margin">
+        <div className="image-tools" ref={this.setContainerPosition}>
+          <div className="menu">
+            <div className="content-wrap">
+
+              {this.valuesDisplay()}
+              <div>
+                <label>Brightness {this.state.values.brt}%</label>
+                <input type="range" data-type="brt" onChange={this.updateValues} value={this.state.values.brt} min="100" max="300"></input>
+                <label>Saturation {this.state.values.sat}%</label>
+                <input type="range" data-type="sat" onChange={this.updateValues} value={this.state.values.sat} min="100" max="300"></input>
+                <label>Contrast {this.state.values.con}%</label>
+                <input type="range" data-type="con" onChange={this.updateValues} value={this.state.values.con} min="0" max="50"></input>
+              </div>
+              {this.scaleDisplay()}
+              <button onClick={this.reset}>Reset</button>
+              <button onClick={this.done}>Done</button>
+              {this.toggleButtonDisplay()}
             </div>
-            {this.scaleDisplay()}
-            <button onClick={this.reset}>Reset</button>
-            <button onClick={this.done}>Done</button>
           </div>
+          {this.imageDisplay()}
+          {this.cropDisplay()}
         </div>
-        {this.imageDisplay()}
-        {this.cropDisplay()}
       </div>
     );
   }
