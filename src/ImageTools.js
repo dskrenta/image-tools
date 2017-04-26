@@ -49,6 +49,7 @@ export default class ImageTools extends React.Component {
   static imageHost = 'https://proxy.topixcdn.com/ipicimg/';
   static defaultValues = {brt: 100, sat: 100, con: 0};
   static defaultGravity = {x: 0, y: 0, scale: 1};
+  static defaultGravityStyle = {x: 100, y: 100};
   static defaultCrop = {x: 10, y: 10, width: 80, height: 80, aspect: 4/2};
 
   constructor(props) {
@@ -59,7 +60,8 @@ export default class ImageTools extends React.Component {
       crop: ImageTools.defaultCrop,
       editSpec: this.parseEditSpec(this.props.editSpec),
       id: this.props.id,
-      displayCrops: undefined
+      displayCrops: undefined,
+      gravityStyle: ImageTools.defaultGravityStyle
     };
     this.baseResetCrop = ImageTools.defaultCrop;
     this.cropTool = this.props.partnerCrops ? this.props.partnerCrops : false;
@@ -106,8 +108,8 @@ export default class ImageTools extends React.Component {
   imageDisplay() {
     if (this.cropTool) {
       const indicatorStyle = {
-        left: this.state.gravity.x,
-        top: this.state.gravity.y
+        left: this.state.gravityStyle.x,
+        top: this.state.gravityStyle.y
       };
       return (
         <div className="master-crop">
@@ -256,6 +258,10 @@ export default class ImageTools extends React.Component {
     this.previewIndicator = ImageTools.createReference(event);
   };
 
+  setContainerPosition = (event) => {
+    this.containerPosition = ImageTools.createReference(event);
+  };
+
   scaleDisplay() {
     if (this.cropTool) {
       return (
@@ -280,7 +286,13 @@ export default class ImageTools extends React.Component {
     const gravityObj = this.state.gravity;
     gravityObj.x = event.clientX;
     gravityObj.y = event.clientY;
-    this.setState({gravity: gravityObj});
+    this.setState({
+      gravity: gravityObj,
+      gravityStyle: {
+        x: event.clientX - this.containerPosition.position.x,
+        y: event.clientY - this.containerPosition.position.y
+      }
+    });
     this.calculateCropValues();
   };
 
@@ -405,27 +417,29 @@ export default class ImageTools extends React.Component {
 
   render() {
     return (
-      <div className="image-tools">
-        <div className="menu">
-          <div className="content-wrap">
+      <div className = "test-margin">
+        <div className="image-tools" ref={this.setContainerPosition}>
+          <div className="menu">
+            <div className="content-wrap">
 
-            {this.valuesDisplay()}
-            <div>
-              <label>Brightness {this.state.values.brt}%</label>
-              <input type="range" data-type="brt" onChange={this.updateValues} value={this.state.values.brt} min="100" max="300"></input>
-              <label>Saturation {this.state.values.sat}%</label>
-              <input type="range" data-type="sat" onChange={this.updateValues} value={this.state.values.sat} min="100" max="300"></input>
-              <label>Contrast {this.state.values.con}%</label>
-              <input type="range" data-type="con" onChange={this.updateValues} value={this.state.values.con} min="0" max="50"></input>
+              {this.valuesDisplay()}
+              <div>
+                <label>Brightness {this.state.values.brt}%</label>
+                <input type="range" data-type="brt" onChange={this.updateValues} value={this.state.values.brt} min="100" max="300"></input>
+                <label>Saturation {this.state.values.sat}%</label>
+                <input type="range" data-type="sat" onChange={this.updateValues} value={this.state.values.sat} min="100" max="300"></input>
+                <label>Contrast {this.state.values.con}%</label>
+                <input type="range" data-type="con" onChange={this.updateValues} value={this.state.values.con} min="0" max="50"></input>
+              </div>
+              {this.scaleDisplay()}
+              <button onClick={this.reset}>Reset</button>
+              <button onClick={this.done}>Done</button>
+              {this.toggleButtonDisplay()}
             </div>
-            {this.scaleDisplay()}
-            <button onClick={this.reset}>Reset</button>
-            <button onClick={this.done}>Done</button>
-            {this.toggleButtonDisplay()}
           </div>
+          {this.imageDisplay()}
+          {this.cropDisplay()}
         </div>
-        {this.imageDisplay()}
-        {this.cropDisplay()}
       </div>
     );
   }
