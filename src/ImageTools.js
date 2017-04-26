@@ -5,7 +5,13 @@ import ReactCrop from './ReactCrop';
 
 /*
   TODO:
-    - allow adjustments to automatic crop by clicking on display crop (preview)
+  - Ability to change sub crops manually
+  - Change default reset values when values passed through props
+  - Fix contrast scale issue between css filter and image magick
+  - Add reset scale property for crop-tool version
+  - Add in tool toggle between crop-tool and image-editor
+  - Add values edit spec to returned crops also
+  - Default center crop-tool indicator
 */
 
 export default class ImageTools extends React.Component {
