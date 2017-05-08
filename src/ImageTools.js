@@ -114,7 +114,8 @@ export default class ImageTools extends React.Component {
         top: this.state.gravityStyle.y
       };
       return (
-        <div className="master-crop">
+        // <div className="master-crop">
+        <div>
           <img
             className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.state.id}`}
             onClick={this.updateGravityPosition} style={this.generateImageStyle()} alt="preview"
@@ -286,13 +287,13 @@ export default class ImageTools extends React.Component {
   updateGravityPosition = (event) => {
     event.persist();
     const gravityObj = this.state.gravity;
-    gravityObj.x = event.clientX;
-    gravityObj.y = event.clientY;
+    gravityObj.x = event.clientX - this.previewImage.position.x;
+    gravityObj.y = event.clientY - this.previewImage.position.y;
     this.setState({
       gravity: gravityObj,
       gravityStyle: {
-        x: event.clientX - this.containerPosition.position.x,
-        y: event.clientY - this.containerPosition.position.y
+        x: event.clientX,
+        y: event.clientY
       }
     });
     this.calculateCropValues();
@@ -419,7 +420,7 @@ export default class ImageTools extends React.Component {
 
   render() {
     return (
-      <div className = "test-margin">
+      <div className="test-margin">
         <div className="image-tools" ref={this.setContainerPosition}>
           <div className="menu">
             <div className="content-wrap">
