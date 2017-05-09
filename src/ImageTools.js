@@ -313,19 +313,24 @@ export default class ImageTools extends React.Component {
   }
 
   parseSpec(spec) {
-    this.passedValues = {};
+    const values = {};
     const specs = spec.split('-');
     for(let value of specs) {
       if(value.startsWith('brt')) {
-        this.passedValues.brt = parseInt(value.match(/\d+/)[0], 10);
+        values.brt = parseInt(value.match(/\d+/)[0], 10);
       } else if (value.startsWith('sat')) {
-        this.passedValues.sat = parseInt(value.match(/\d+/)[0], 10);
+        values.sat = parseInt(value.match(/\d+/)[0], 10);
       } else if (value.startsWith('con')) {
-        this.passedValues.con = parseInt(value.match(/\d+/)[0], 10);
+        values.con = parseInt(value.match(/\d+/)[0], 10);
       } else if (value.startsWith('cp')) {
         this.cropValuesSpec = value;
       }
     }
+    this.passedValues = {
+      brt: values.brt || ImageTools.defaultValues.brt,
+      sat: values.sat || ImageTools.defaultValues.sat,
+      con: values.con || ImageTools.defaultValues.con,
+    };
     return specs.filter(spec => !spec.startsWith('cp'));
   }
 
