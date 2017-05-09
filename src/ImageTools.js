@@ -60,14 +60,13 @@ export default class ImageTools extends React.Component {
       values: ImageTools.defaultValues,
       gravity: ImageTools.defaultGravity,
       crop: ImageTools.defaultCrop,
-      editSpec: this.parseEditSpec(this.props.editSpec),
+      editSpec: this.parseSpec(this.props.editSpec),
       id: this.props.id,
       displayCrops: undefined,
       gravityStyle: ImageTools.defaultGravityStyle
     };
     this.baseResetCrop = ImageTools.defaultCrop;
     this.cropTool = this.props.partnerCrops ? this.props.partnerCrops : false;
-    // this.resetValues = ImageTools.defaultValues;
     this.imageLoaded = new Promise((resolve, reject) => {
       this.imageLoadedResolve = resolve;
       this.imageLoadedReject = reject;
@@ -76,6 +75,7 @@ export default class ImageTools extends React.Component {
   }
 
   componentDidMount() {
+    console.log(this.passedValues);
     if (this.passedValues) {
       this.resetValues = this.passedValues;
       this.setState({values: this.resetValues});
@@ -84,13 +84,13 @@ export default class ImageTools extends React.Component {
 
   toggleButtonDisplay() {
     if (this.cropTool) {
-      return <button onClick={this.toggleButtonOnclick}>Image Edit</button>;
+      return <button onClick={this.toggleButton}>Image Edit</button>;
     } else if (this.props.partnerCrops) {
-      return <button onClick={this.toggleButtonOnclick}>Crop Tool</button>;
+      return <button onClick={this.toggleButton}>Crop Tool</button>;
     }
   }
 
-  toggleButtonOnclick = (event) => {
+  toggleButton = (event) => {
     this.cropTool = !this.cropTool;
     this.setState(this.state);
   };
@@ -114,7 +114,7 @@ export default class ImageTools extends React.Component {
         top: this.state.gravityStyle.y
       };
       return (
-        <div className="master-crop">
+        <div>
           <img
             className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.state.id}`}
             onClick={this.updateGravityPosition} style={this.generateImageStyle()} alt="preview"
@@ -130,7 +130,8 @@ export default class ImageTools extends React.Component {
         <ReactCrop
           className="preview-image" onImageLoaded={this.onImageLoaded}
           src={`${ImageTools.imageHost}${this.state.id}`}
-          crop={this.state.crop} onChange={this.cropUpdate} style={this.generateImageStyle()}
+          crop={this.state.crop} onChange={this.cropUpdate}
+          style={this.generateImageStyle()}
         />
       );
     }
@@ -138,7 +139,9 @@ export default class ImageTools extends React.Component {
 
   generateImageStyle() {
     return {
-      filter: `brightness(${this.state.values.brt}%) saturate(${this.state.values.sat}%) contrast(${100 + parseInt(this.state.values.con, 10)}%)`
+      filter: `brightness(${this.state.values.brt}%) ` +
+      `saturate(${this.state.values.sat}%) ` +
+      `contrast(${100 + parseInt(this.state.values.con, 10)}%)`
     };
   }
 
@@ -252,16 +255,12 @@ export default class ImageTools extends React.Component {
     this.setState({displayCrops: specs.map(spec => `${ImageTools.imageHost}${this.state.id}-${spec}`)});
   }
 
-  setImagePosition = (event) => {
-    this.previewImage = ImageTools.createReference(event);
+  setImagePosition = (element) => {
+    this.previewImage = ImageTools.createReference(element);
   };
 
-  setIndicatorPosition = (event) => {
-    this.previewIndicator = ImageTools.createReference(event);
-  };
-
-  setContainerPosition = (event) => {
-    this.containerPosition = ImageTools.createReference(event);
+  setIndicatorPosition = (element) => {
+    this.previewIndicator = ImageTools.createReference(element);
   };
 
   scaleDisplay() {
@@ -286,13 +285,13 @@ export default class ImageTools extends React.Component {
   updateGravityPosition = (event) => {
     event.persist();
     const gravityObj = this.state.gravity;
-    gravityObj.x = event.clientX;
-    gravityObj.y = event.clientY;
+    gravityObj.x = event.clientX - this.previewImage.position.x;
+    gravityObj.y = event.clientY - this.previewImage.position.y + (event.pageY - event.clientY);
     this.setState({
       gravity: gravityObj,
       gravityStyle: {
-        x: event.clientX - this.containerPosition.position.x,
-        y: event.clientY - this.containerPosition.position.y
+        x: event.pageX,
+        y: event.pageY
       }
     });
     this.calculateCropValues();
@@ -313,38 +312,38 @@ export default class ImageTools extends React.Component {
     }
   }
 
-  // needs refactoring
-  parseEditSpec(editSpec) {
-    let cpIndex = undefined;
-    this.passedValues = {};
-    const specs = editSpec.split('-');
-    const returnSpec = specs.filter(spec => {
-      if (spec.startsWith('cp')) {
-        cpIndex = specs.indexOf(spec);
-        return false;
-      } else {
-        const valueObj = {key: spec.slice(0, 3), value: spec.slice(3)};
-        if (valueObj.key === 'con') {
-          valueObj.value = valueObj.value.split('x').slice(0, 1).toString();
-        }
-        this.passedValues[valueObj.key] = parseInt(valueObj.value, 10);
-        return true;
+  parseSpec(spec) {
+    const values = {};
+    const specs = spec.split('-');
+    for(let value of specs) {
+      if(value.startsWith('brt')) {
+        values.brt = parseInt(value.match(/\d+/)[0], 10);
+      } else if (value.startsWith('sat')) {
+        values.sat = parseInt(value.match(/\d+/)[0], 10);
+      } else if (value.startsWith('con')) {
+        values.con = parseInt(value.match(/\d+/)[0], 10);
+      } else if (value.startsWith('cp')) {
+        this.cropValuesSpec = value;
       }
-    }).join('-');
-    this.cropValuesSpec = specs[cpIndex];
-    return returnSpec;
+    }
+    this.passedValues = {
+      brt: values.brt || ImageTools.defaultValues.brt,
+      sat: values.sat || ImageTools.defaultValues.sat,
+      con: values.con || ImageTools.defaultValues.con,
+    };
+    return specs.filter(spec => !spec.startsWith('cp'));
   }
 
   parseCrop(cropSpec) {
-    let values = Array.from(cropSpec).slice(2).join('').split('x');
-    const cropObj = {
+    const values = cropSpec.match(/\d+/g);
+    const crop = {
       x: values[0],
       y: values[1],
       width: values[2] - values[0],
       height: values[3] - values[1],
     };
-    cropObj.aspect = this.props.aspectLock ? (cropObj.width / cropObj.height) : undefined;
-    return cropObj;
+    crop.aspect = this.props.aspectLock ? (crop.width / crop.height) : undefined;
+    return crop;
   }
 
   onImageLoaded = (crop, image, pixelCrop) => {
@@ -385,9 +384,13 @@ export default class ImageTools extends React.Component {
   };
 
   reset = (event) => {
-    console.log(this.resetValues);
-    this.setState({crop: this.baseResetCrop, gravity: ImageTools.defaultGravity, values: this.resetValues});
-    this.updateEditSpec(this.resetValues);
+    console.log(this.passedValues);
+    this.setState({
+      crop: this.baseResetCrop,
+      gravity: ImageTools.defaultGravity,
+      values: this.passedValues || ImageTools.defaultValues
+    });
+    this.updateEditSpec(this.passedValues || ImageTools.defaultValues);
   };
 
   done = (event) => {
@@ -419,11 +422,10 @@ export default class ImageTools extends React.Component {
 
   render() {
     return (
-      <div className = "test-margin">
+      <div className="test-margin">
         <div className="image-tools" ref={this.setContainerPosition}>
           <div className="menu">
             <div className="content-wrap">
-
               {this.valuesDisplay()}
               <div>
                 <label>Brightness {this.state.values.brt}%</label>
