@@ -60,7 +60,6 @@ export default class ImageTools extends React.Component {
       values: ImageTools.defaultValues,
       gravity: ImageTools.defaultGravity,
       crop: ImageTools.defaultCrop,
-      // editSpec: this.parseEditSpec(this.props.editSpec),
       editSpec: this.parseSpec(this.props.editSpec),
       id: this.props.id,
       displayCrops: undefined,
@@ -68,7 +67,6 @@ export default class ImageTools extends React.Component {
     };
     this.baseResetCrop = ImageTools.defaultCrop;
     this.cropTool = this.props.partnerCrops ? this.props.partnerCrops : false;
-    // this.resetValues = ImageTools.defaultValues;
     this.imageLoaded = new Promise((resolve, reject) => {
       this.imageLoadedResolve = resolve;
       this.imageLoadedReject = reject;
@@ -116,7 +114,6 @@ export default class ImageTools extends React.Component {
         top: this.state.gravityStyle.y
       };
       return (
-        // <div className="master-crop">
         <div>
           <img
             className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.state.id}`}
@@ -133,7 +130,8 @@ export default class ImageTools extends React.Component {
         <ReactCrop
           className="preview-image" onImageLoaded={this.onImageLoaded}
           src={`${ImageTools.imageHost}${this.state.id}`}
-          crop={this.state.crop} onChange={this.cropUpdate} style={this.generateImageStyle()}
+          crop={this.state.crop} onChange={this.cropUpdate}
+          style={this.generateImageStyle()}
         />
       );
     }
@@ -141,7 +139,9 @@ export default class ImageTools extends React.Component {
 
   generateImageStyle() {
     return {
-      filter: `brightness(${this.state.values.brt}%) saturate(${this.state.values.sat}%) contrast(${100 + parseInt(this.state.values.con, 10)}%)`
+      filter: `brightness(${this.state.values.brt}%) ` +
+      `saturate(${this.state.values.sat}%) ` +
+      `contrast(${100 + parseInt(this.state.values.con, 10)}%)`
     };
   }
 
@@ -312,28 +312,6 @@ export default class ImageTools extends React.Component {
     }
   }
 
-  // needs refactoring
-  parseEditSpec(editSpec) {
-    let cpIndex = undefined;
-    this.passedValues = {};
-    const specs = editSpec.split('-');
-    const returnSpec = specs.filter(spec => {
-      if (spec.startsWith('cp')) {
-        cpIndex = specs.indexOf(spec);
-        return false;
-      } else {
-        const valueObj = {key: spec.slice(0, 3), value: spec.slice(3)};
-        if (valueObj.key === 'con') {
-          valueObj.value = valueObj.value.split('x').slice(0, 1).toString();
-        }
-        this.passedValues[valueObj.key] = parseInt(valueObj.value, 10);
-        return true;
-      }
-    }).join('-');
-    this.cropValuesSpec = specs[cpIndex];
-    return returnSpec;
-  }
-
   parseSpec(spec) {
     this.passedValues = {};
     const specs = spec.split('-');
@@ -401,12 +379,13 @@ export default class ImageTools extends React.Component {
   };
 
   reset = (event) => {
+    console.log(this.passedValues);
     this.setState({
       crop: this.baseResetCrop,
       gravity: ImageTools.defaultGravity,
       values: this.passedValues || ImageTools.defaultValues
     });
-    this.updateEditSpec(this.resetValues);
+    this.updateEditSpec(this.passedValues || ImageTools.defaultValues);
   };
 
   done = (event) => {
@@ -442,7 +421,6 @@ export default class ImageTools extends React.Component {
         <div className="image-tools" ref={this.setContainerPosition}>
           <div className="menu">
             <div className="content-wrap">
-
               {this.valuesDisplay()}
               <div>
                 <label>Brightness {this.state.values.brt}%</label>
