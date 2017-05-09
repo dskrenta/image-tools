@@ -60,7 +60,8 @@ export default class ImageTools extends React.Component {
       values: ImageTools.defaultValues,
       gravity: ImageTools.defaultGravity,
       crop: ImageTools.defaultCrop,
-      editSpec: this.parseEditSpec(this.props.editSpec),
+      // editSpec: this.parseEditSpec(this.props.editSpec),
+      editSpec: this.parseSpec(this.props.editSpec),
       id: this.props.id,
       displayCrops: undefined,
       gravityStyle: ImageTools.defaultGravityStyle
@@ -76,6 +77,7 @@ export default class ImageTools extends React.Component {
   }
 
   componentDidMount() {
+    console.log(this.passedValues);
     if (this.passedValues) {
       this.resetValues = this.passedValues;
       this.setState({values: this.resetValues});
@@ -253,16 +255,12 @@ export default class ImageTools extends React.Component {
     this.setState({displayCrops: specs.map(spec => `${ImageTools.imageHost}${this.state.id}-${spec}`)});
   }
 
-  setImagePosition = (event) => {
-    this.previewImage = ImageTools.createReference(event);
+  setImagePosition = (element) => {
+    this.previewImage = ImageTools.createReference(element);
   };
 
-  setIndicatorPosition = (event) => {
-    this.previewIndicator = ImageTools.createReference(event);
-  };
-
-  setContainerPosition = (event) => {
-    this.containerPosition = ImageTools.createReference(event);
+  setIndicatorPosition = (element) => {
+    this.previewIndicator = ImageTools.createReference(element);
   };
 
   scaleDisplay() {
@@ -288,12 +286,12 @@ export default class ImageTools extends React.Component {
     event.persist();
     const gravityObj = this.state.gravity;
     gravityObj.x = event.clientX - this.previewImage.position.x;
-    gravityObj.y = event.clientY - this.previewImage.position.y;
+    gravityObj.y = event.clientY - this.previewImage.position.y + (event.pageY - event.clientY);
     this.setState({
       gravity: gravityObj,
       gravityStyle: {
-        x: event.clientX,
-        y: event.clientY
+        x: event.pageX,
+        y: event.pageY
       }
     });
     this.calculateCropValues();
@@ -336,16 +334,33 @@ export default class ImageTools extends React.Component {
     return returnSpec;
   }
 
+  parseSpec(spec) {
+    this.passedValues = {};
+    const specs = spec.split('-');
+    for(let value of specs) {
+      if(value.startsWith('brt')) {
+        this.passedValues.brt = parseInt(value.match(/\d+/)[0], 10);
+      } else if (value.startsWith('sat')) {
+        this.passedValues.sat = parseInt(value.match(/\d+/)[0], 10);
+      } else if (value.startsWith('con')) {
+        this.passedValues.con = parseInt(value.match(/\d+/)[0], 10);
+      } else if (value.startsWith('cp')) {
+        this.cropValuesSpec = value;
+      }
+    }
+    return specs.filter(spec => !spec.startsWith('cp'));
+  }
+
   parseCrop(cropSpec) {
-    let values = Array.from(cropSpec).slice(2).join('').split('x');
-    const cropObj = {
+    const values = cropSpec.match(/\d+/g);
+    const crop = {
       x: values[0],
       y: values[1],
       width: values[2] - values[0],
       height: values[3] - values[1],
     };
-    cropObj.aspect = this.props.aspectLock ? (cropObj.width / cropObj.height) : undefined;
-    return cropObj;
+    crop.aspect = this.props.aspectLock ? (crop.width / crop.height) : undefined;
+    return crop;
   }
 
   onImageLoaded = (crop, image, pixelCrop) => {
@@ -386,8 +401,11 @@ export default class ImageTools extends React.Component {
   };
 
   reset = (event) => {
-    console.log(this.resetValues);
-    this.setState({crop: this.baseResetCrop, gravity: ImageTools.defaultGravity, values: this.resetValues});
+    this.setState({
+      crop: this.baseResetCrop,
+      gravity: ImageTools.defaultGravity,
+      values: this.passedValues || ImageTools.defaultValues
+    });
     this.updateEditSpec(this.resetValues);
   };
 
