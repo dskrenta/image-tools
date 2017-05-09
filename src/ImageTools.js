@@ -84,13 +84,13 @@ export default class ImageTools extends React.Component {
 
   toggleButtonDisplay() {
     if (this.cropTool) {
-      return <button onClick={this.toggleButtonOnclick}>Image Edit</button>;
+      return <button onClick={this.toggleButton}>Image Edit</button>;
     } else if (this.props.partnerCrops) {
-      return <button onClick={this.toggleButtonOnclick}>Crop Tool</button>;
+      return <button onClick={this.toggleButton}>Crop Tool</button>;
     }
   }
 
-  toggleButtonOnclick = (event) => {
+  toggleButton = (event) => {
     this.cropTool = !this.cropTool;
     this.setState(this.state);
   };
