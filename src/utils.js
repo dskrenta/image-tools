@@ -27,3 +27,20 @@ export function convertPixelToPercent(crop, baseDimensions, aspectLock) {
     aspect: aspectLock ? (crop.width / crop.height) : undefined
   };
 }
+
+export function parseSpec(spec, defaultValues) {
+  return {
+    brt: parseInt(spec.match(/brt(\d+)/)[1], 10) || defaultValues.brt,
+    sat: parseInt(spec.match(/sat(\d+)/)[1], 10) || defaultValues.sat,
+    con: parseInt(spec.match(/con(\d+)/)[1], 10) || defaultValues.con,
+  };
+}
+
+export function parseCrop(spec) {
+  return {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0
+  };
+}

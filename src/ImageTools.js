@@ -6,7 +6,7 @@ import {
   convertCropScale,
   convertPercentToPixel,
   convertPixelToPercent,
-  parseEditSpec
+  parseSpec
 } from './utils';
 import './ImageTools.css';
 
@@ -36,7 +36,7 @@ export default class ImageTools extends React.Component {
     super(props);
     this.imageToolsState = new ImageToolsState(
       this.props.id,
-      parseEditSpec(this.props.editSpec),
+      parseSpec(this.props.editSpec),
       ImageTools.defaultGravity,
       ImageTools.defaultCrop
     );
