@@ -32,7 +32,7 @@ export function parseSpec(spec, defaultValues) {
   return {
     brt: parseInt(spec.match(/brt(\d+)/)[1], 10) || defaultValues.brt,
     sat: parseInt(spec.match(/sat(\d+)/)[1], 10) || defaultValues.sat,
-    con: parseInt(spec.match(/con(\d+)/)[1], 10) || defaultValues.con,
+    con: parseInt(spec.match(/con(\d+)/)[1], 10) || defaultValues.con
   };
 }
 

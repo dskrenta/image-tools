@@ -1,16 +1,16 @@
 import {observable, computed} from 'mobx';
 
 export default class ImageToolsState {
-  // id;
-  // @observable values;
-  // @observable gravity;
-  // @observable crop;
+  id;
+  @observable values;
+  @observable gravity;
+  @observable crop;
 
-  constructor(id, initialValues, initialGravity, initialCrop) {
-    this.id = id;
-    @observable this.values = initialValues;
-    @observable this.gravity = initialGravity;
-    @observable this.crop = initialCrop;
+  constructor(imageID, initialValues, initialGravity, initialCrop) {
+    this.imageID = imageID;
+    this.values = initialValues;
+    this.gravity = initialGravity;
+    this.crop = initialCrop;
   }
 
   @computed get imageStyle() {
