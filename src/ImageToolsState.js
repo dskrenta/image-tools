@@ -6,8 +6,11 @@ export default class ImageToolsState {
   @observable gravity;
   @observable crop;
 
-  constructor(id, values, gravity, crop) {
-
+  constructor(id, initialValues, initialGravity, initialCrop) {
+    this.id = id;
+    this.values = initialValues;
+    this.gravity = initialGravity;
+    this.crop = initialCrop;
   }
 
   @computed get imageStyle() {
