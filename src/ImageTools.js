@@ -119,7 +119,7 @@ export default class ImageTools extends React.Component {
           className="preview-image" onImageLoaded={this.onImageLoaded}
           src={`${ImageTools.imageHost}${this.store.id}`}
           crop={this.store.crop} onChange={this.cropUpdate}
-          style={this.store.imageStyle()}
+          style={this.store.imageStyle}
         />
       );
     }
@@ -130,8 +130,8 @@ export default class ImageTools extends React.Component {
       await this.imageLoaded;
       const cropObj = parseCrop(this.props.editSpec);
       if (cropObj) {
-        const convertedCrop = this.convertCropScale(cropObj, this.imageDimensions.natural, this.imageDimensions.display);
-        const convertedCropValues = this.convertPixelToPercent(convertedCrop, this.imageDimensions.display);
+        const convertedCrop = convertCropScale(cropObj, this.imageDimensions.natural, this.imageDimensions.display, this.props.aspectLock);
+        const convertedCropValues = convertPixelToPercent(convertedCrop, this.imageDimensions.display, this.props.aspectLock);
         this.store.crop = convertedCropValues;
       }
     } catch (err) {
