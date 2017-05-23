@@ -6,12 +6,19 @@ export default class ImageToolsState {
   @observable gravity;
   @observable crop;
   @observable pixelCrop;
+  @observable gravityStyle
 
-  constructor(id, initialValues, initialGravity, initialCrop) {
+  constructor(id, initialValues, initialGravity, initialCrop, initialGravityStyle) {
     this.id = id;
     this.values = initialValues;
     this.gravity = initialGravity;
     this.crop = initialCrop;
+    this.gravityStyle = initialGravityStyle;
+  }
+
+  /*
+  set id(id) {
+    this.id = id;
   }
 
   set values(values) {
@@ -30,6 +37,10 @@ export default class ImageToolsState {
     this.pixelCrop = pixelCrop;
   }
 
+  set gravityStyle(gravityStyle) {
+    this.gravityStyle = gravityStyle;
+  }
+
   get id() {
     return this.id;
   }
@@ -45,6 +56,11 @@ export default class ImageToolsState {
   get pixelCrop() {
     return this.pixelCrop;
   }
+
+  get gravityStyle() {
+    return this.gravityStyle;
+  }
+  */
 
   @computed get imageStyle() {
     return {
@@ -62,9 +78,5 @@ export default class ImageToolsState {
 
   @computed get finalSpec() {
 
-  }
-
-  @computed get gravityStyle() {
-    // return gravityStyle
   }
 }

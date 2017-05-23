@@ -8,7 +8,9 @@ import {
   convertCropScale,
   convertPercentToPixel,
   convertPixelToPercent,
-  parseSpec
+  parseSpec,
+  parseCrop,
+  calculateCropValues
 } from './utils';
 import './ImageTools.css';
 
@@ -51,6 +53,7 @@ export default class ImageTools extends React.Component {
   static defaultGravity = {x: 0, y: 0, scale: 1};
   static defaultValues = {brt: 100, sat: 100, con: 0};
   static defaultCrop = {x: 10, y: 10, width: 80, height: 80, aspect: 4/2};
+  static defaultGravityStyle = {x: 100, y: 100};
 
   constructor(props) {
     super(props);
@@ -58,9 +61,15 @@ export default class ImageTools extends React.Component {
       this.props.id,
       parseSpec(this.props.editSpec, ImageTools.defaultValues),
       ImageTools.defaultGravity,
-      ImageTools.defaultCrop
+      ImageTools.defaultCrop,
+      ImageTools.defaultGravityStyle
     );
     this.cropTool = this.props.partnerCrops ? this.props.partnerCrops : false;
+    this.imageLoaded = new Promise((resolve, reject) => {
+      this.imageLoadedResolve = resolve;
+      this.imageLoadedReject = reject;
+    });
+    this.editSpecPattern();
   }
 
   setImagePosition = (element) => {
@@ -72,12 +81,14 @@ export default class ImageTools extends React.Component {
   };
 
   valuesDisplay() {
-    return (
-      <h3>{this.store.pixelCrop.width} x {this.store.pixelCrop.height}, {this.store.crop.aspect.toFixed(2)}</h3>
-    );
+    if (this.store.pixelCrop && this.store.crop) {
+      return (
+        <h3>{this.store.pixelCrop.width} x {this.store.pixelCrop.height}, {this.store.crop.aspect.toFixed(2)}</h3>
+      );
+    }
   }
 
-  scalesDisplay() {
+  scaleDisplay() {
     if (this.cropTool) {
       return (
         <div>
@@ -93,8 +104,8 @@ export default class ImageTools extends React.Component {
       return (
         <div>
           <img
-            className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.state.id}`}
-            onClick={this.updateGravityPosition} style={this.generateImageStyle()} alt="preview"
+            className="image" ref={this.setImagePosition} src={`${ImageTools.imageHost}${this.store.id}`}
+            onClick={this.updateGravityPosition} style={this.store.imageStyle} alt="preview"
           />
           <span
             className="indicator" ref={this.setIndicatorPosition}
@@ -114,6 +125,20 @@ export default class ImageTools extends React.Component {
     }
   }
 
+  async editSpecPattern() {
+    try {
+      await this.imageLoaded;
+      const cropObj = parseCrop(this.props.editSpec);
+      if (cropObj) {
+        const convertedCrop = this.convertCropScale(cropObj, this.imageDimensions.natural, this.imageDimensions.display);
+        const convertedCropValues = this.convertPixelToPercent(convertedCrop, this.imageDimensions.display);
+        this.store.crop = convertedCropValues;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   updateValues = (event) => {
     const value = event.target.value;
     const type = event.target.dataset.type;
@@ -122,12 +147,12 @@ export default class ImageTools extends React.Component {
     this.store.values = values;
   }
 
-  updateScale = () => {
+  updateScale = (event) => {
     const value = event.target.value;
     const gravityObj = this.state.gravity;
     gravityObj.scale = value / 100;
     this.store.gravity = gravityObj;
-    // this.calculateCropValues();
+    calculateCropValues(this.props.parterCrops, this.previewImage, this.store.gravity);
   }
 
   cropUpdate = (crop, pixelCrop) => {
@@ -149,24 +174,17 @@ export default class ImageTools extends React.Component {
       aspect: image.clientWidth / image.clientHeight
     }
     this.store.pixelCrop = pixelCrop;
-    // this.imageLoadedResolve();
+    this.imageLoadedResolve();
   }
 
-  // convert to mobx
-  // change gravity style to observable in state
   updateGravityPosition = (event) => {
     event.persist();
     const gravityObj = this.state.gravity;
     gravityObj.x = event.clientX - this.previewImage.position.x;
     gravityObj.y = event.clientY - this.previewImage.position.y + (event.pageY - event.clientY);
-    this.setState({
-      gravity: gravityObj,
-      gravityStyle: {
-        x: event.pageX,
-        y: event.pageY
-      }
-    });
-    this.calculateCropValues();
+    this.store.gravity = gravityObj;
+    this.store.gravityStyle = {x: event.pageX, y: event.pageY};
+    calculateCropValues(this.props.parterCrops, this.previewImage, this.store.gravity);
   }
 
   render() {
@@ -190,7 +208,6 @@ export default class ImageTools extends React.Component {
            </div>
          </div>
          {this.imageDisplay()}
-         {this.cropDisplay()}
        </div>
      </div>
     );
