@@ -15,53 +15,7 @@ export default class ImageToolsState {
     this.crop = initialCrop;
     this.gravityStyle = initialGravityStyle;
   }
-
-  /*
-  set id(id) {
-    this.id = id;
-  }
-
-  set values(values) {
-    this.values = values;
-  }
-
-  set gravity(gravity) {
-    this.gravity = gravity;
-  }
-
-  set crop(crop) {
-    this.crop = crop;
-  }
-
-  set pixelCrop(pixelCrop) {
-    this.pixelCrop = pixelCrop;
-  }
-
-  set gravityStyle(gravityStyle) {
-    this.gravityStyle = gravityStyle;
-  }
-
-  get id() {
-    return this.id;
-  }
-
-  get crop() {
-    return this.crop;
-  }
-
-  get values() {
-    return this.values;
-  }
-
-  get pixelCrop() {
-    return this.pixelCrop;
-  }
-
-  get gravityStyle() {
-    return this.gravityStyle;
-  }
-  */
-
+  
   @computed get imageStyle() {
     return {
       filter: `brightness(${this.values.brt}%) ` +

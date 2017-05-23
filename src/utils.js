@@ -118,8 +118,8 @@ export function calculateCropValues(partnerCrops, previewImage, gravity) {
         height: resizeHeight
       },
       {
-        width: this.previewImage.element.naturalWidth,
-        height: this.previewImage.element.naturalHeight
+        width: previewImage.element.naturalWidth,
+        height: previewImage.element.naturalHeight
       }
     );
     const cropSpec = `cp${scaled.x}x${scaled.y}x${scaled.width}x${scaled.height}`;

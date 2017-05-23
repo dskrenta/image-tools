@@ -53,7 +53,7 @@ export default class ImageTools extends React.Component {
   static defaultGravity = {x: 0, y: 0, scale: 1};
   static defaultValues = {brt: 100, sat: 100, con: 0};
   static defaultCrop = {x: 10, y: 10, width: 80, height: 80, aspect: 4/2};
-  static defaultGravityStyle = {x: 100, y: 100};
+  static defaultGravityStyle = {left: 100, top: 100};
 
   constructor(props) {
     super(props);
@@ -142,17 +142,17 @@ export default class ImageTools extends React.Component {
   updateValues = (event) => {
     const value = event.target.value;
     const type = event.target.dataset.type;
-    const values = this.state.values;
+    const values = this.store.values;
     values[type] = value;
     this.store.values = values;
   }
 
   updateScale = (event) => {
     const value = event.target.value;
-    const gravityObj = this.state.gravity;
+    const gravityObj = this.store.gravity;
     gravityObj.scale = value / 100;
     this.store.gravity = gravityObj;
-    calculateCropValues(this.props.parterCrops, this.previewImage, this.store.gravity);
+    calculateCropValues(this.props.partnerCrops, this.previewImage, this.store.gravity);
   }
 
   cropUpdate = (crop, pixelCrop) => {
@@ -179,12 +179,12 @@ export default class ImageTools extends React.Component {
 
   updateGravityPosition = (event) => {
     event.persist();
-    const gravityObj = this.state.gravity;
+    const gravityObj = this.store.gravity;
     gravityObj.x = event.clientX - this.previewImage.position.x;
     gravityObj.y = event.clientY - this.previewImage.position.y + (event.pageY - event.clientY);
     this.store.gravity = gravityObj;
-    this.store.gravityStyle = {x: event.pageX, y: event.pageY};
-    calculateCropValues(this.props.parterCrops, this.previewImage, this.store.gravity);
+    this.store.gravityStyle = {left: event.pageX, top: event.pageY};
+    calculateCropValues(this.props.partnerCrops, this.previewImage, this.store.gravity);
   }
 
   render() {
