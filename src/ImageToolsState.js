@@ -6,7 +6,7 @@ export default class ImageToolsState {
   @observable gravity;
   @observable crop;
   @observable pixelCrop;
-  @observable gravityStyle
+  @observable gravityStyle;
 
   constructor(id, initialValues, initialGravity, initialCrop, initialGravityStyle) {
     this.id = id;
@@ -15,7 +15,7 @@ export default class ImageToolsState {
     this.crop = initialCrop;
     this.gravityStyle = initialGravityStyle;
   }
-  
+
   @computed get imageStyle() {
     return {
       filter: `brightness(${this.values.brt}%) ` +
