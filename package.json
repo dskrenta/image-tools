@@ -2,13 +2,14 @@
   "name": "image-tools",
   "version": "0.0.0",
   "dependencies": {
+    "mobx": "^3.1.9",
+    "mobx-react": "^4.1.8",
     "prop-types": "^15.5.8",
     "react": "^15.4.2",
-    "react-dom": "^15.4.2",
-    "react-image-crop": "^2.0.3"
+    "react-dom": "^15.4.2"
   },
   "devDependencies": {
-    "react-scripts": "0.9.5"
+    "custom-react-scripts": "0.0.23"
   },
   "scripts": {
     "start": "react-scripts start",
