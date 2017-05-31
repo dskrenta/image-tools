@@ -173,7 +173,7 @@ export default class ImageTools extends React.Component {
     const gravityObj = this.gravity;
     gravityObj.scale = value / 100;
     this.gravity = gravityObj;
-    calculateCropValues(this.props.partnerCrops, this.previewImage, this.gravity);
+    this.finalCrops = calculateCropValues(this.props.partnerCrops, this.previewImage, this.gravity);
   }
 
   cropUpdate = (crop, pixelCrop) => {
@@ -205,7 +205,27 @@ export default class ImageTools extends React.Component {
     gravityObj.y = event.clientY - this.previewImage.position.y + (event.pageY - event.clientY);
     this.gravity = gravityObj;
     this.gravityStyle = {left: event.pageX, top: event.pageY};
-    calculateCropValues(this.props.partnerCrops, this.previewImage, this.gravity);
+    this.finalCrops = calculateCropValues(this.props.partnerCrops, this.previewImage, this.gravity);
+  }
+
+  reset = () => {
+    this.values = ImageTools.defaultValues;
+    this.gravity = ImageTools.defaultGravity;
+    this.gravityStyle = ImageTools.defaultGravityStyle;
+  }
+
+  done = () => {
+    this.props.cb(this.cropTool ? this.finalCrops : this.createFinalEditSpec());
+  }
+
+  createFinalEditSpec() {
+    let cropParam = '';
+    if (this.imageDimensions && this.crop) {
+      const convertedCropValues = convertPercentToPixel(this.crop, this.imageDimensions.display);
+      const naturalCrop = convertCropScale(convertedCropValues, this.imageDimensions.display, this.imageDimensions.natural);
+      cropParam = `-cp${naturalCrop.x}x${naturalCrop.y}x${naturalCrop.width + naturalCrop.x}x${naturalCrop.height + naturalCrop.y}`;
+    }
+    return `brt${this.values.brt}-sat${this.values.sat}-con${this.values.con}x${100 - this.values.con}${cropParam}`;
   }
 
   render() {
