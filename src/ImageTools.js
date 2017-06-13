@@ -61,6 +61,7 @@ export default class ImageTools extends React.Component {
   @observable crop;
   @observable pixelCrop;
   @observable gravityStyle;
+  @observable finalCrops;
 
   constructor(props) {
     super(props);
@@ -91,6 +92,14 @@ export default class ImageTools extends React.Component {
     return `brt${this.values.brt}` +
     `-sat${this.values.sat}` +
     `-con${this.values.con}x${100 - this.values.con}`;
+  }
+
+  @computed get displayCrops() {
+    if (this.finalCrops) {
+      return this.finalCrops.map(spec => `${ImageTools.imageHost}${this.id}-${spec}`);
+    } else {
+      return null;
+    }
   }
 
   setImagePosition = (element) => {
@@ -228,6 +237,18 @@ export default class ImageTools extends React.Component {
     return `brt${this.values.brt}-sat${this.values.sat}-con${this.values.con}x${100 - this.values.con}${cropParam}`;
   }
 
+  cropDisplay() {
+    if (this.displayCrops && this.cropTool) {
+      return (
+        <div className="display-crop-container">
+          {this.displayCrops.map((imageUrl, index) => {
+            return <img className="display-crop" key={index} src={imageUrl} style={this.imageStyle} alt="display-crop"/>;
+          })}
+        </div>
+      );
+    }
+  }
+
   render() {
     return (
       <div className="test-margin">
@@ -249,6 +270,7 @@ export default class ImageTools extends React.Component {
            </div>
          </div>
          {this.imageDisplay()}
+         {this.cropDisplay()}
        </div>
      </div>
     );
